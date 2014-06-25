@@ -1,0 +1,32 @@
+arcad-hts - High-throughput sequencing for ARCAD project
+========================================================
+
+This directory contains arcad-hts, a package gathering scripts for the 
+analysis of high-throughput sequencing data from the ARCAD project.
+
+arcad-hts (copyright INRA-CIRAD) is free software, you can redistribute it 
+and/or modify it under the terms of the GNU General Public License (GPLv3+).
+
+The GNU General Public License does not permit this software to be
+redistributed in proprietary programs.
+
+This library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+The code is hosted online: https://github.com/SouthGreenPlatform/arcad-hts
+
+
+Installation
+============
+
+TODO
+
+
+More information about arcad-hts
+================================
+
+TODO
+
+Please report issues on GitHub: https://github.com/SouthGreenPlatform/arcad-hts/issues
+
