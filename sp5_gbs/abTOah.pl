@@ -1,6 +1,5 @@
 #!/bin/env perl
 
-#  abTOah.pl
 #  
 #  Copyright 2014 INRA-CIRAD
 #  
@@ -15,8 +14,9 @@
 #  GNU General Public License for more details.
 #  
 #  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  along with this program; if not, see <http://www.gnu.org/licenses/> or 
+#  write to the Free Software Foundation, Inc., 
+#  51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #  
 #  
@@ -25,11 +25,11 @@
 
 =head1 NAME
 
-abTOah.pl - Transformes ab coding into AH coding. Coding compatible with Carthagene tool
+abTOah.pl - Transforme ab coding into AH coding. Coding compatible with Carthagene tool
 
 =head1 DESCRIPTION
 
-Transformes ab coding into AH coding. Coding compatible with Carthagene tool
+Transforms ab coding into AH coding. Coding compatible with Carthagene tool
 
 Creates two files : female genotype file and male genotype file
 
@@ -579,8 +579,6 @@ Fully compatble with any perl version
 
 =head1 LICENSE AND COPYRIGHT
 
-  abTOah.pl
-  
   Copyright 2014 INRA-CIRAD
   
   This program is free software; you can redistribute it and/or modify
@@ -594,8 +592,9 @@ Fully compatble with any perl version
   GNU General Public License for more details.
   
   You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  along with this program; if not, if not, see <http://www.gnu.org/licenses/> 
+  or write to the Free Software Foundation, Inc.,
+  51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301, USA.
 
 =cut
