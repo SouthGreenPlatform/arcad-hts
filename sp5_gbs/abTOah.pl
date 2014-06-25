@@ -1,5 +1,25 @@
 #!/bin/env perl
 
+#  abTOah.pl
+#  
+#  Copyright 2014 INRA-CIRAD
+#  
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
+#  
+#  
 
 =pod
 
@@ -129,7 +149,7 @@ open(OUT1, ">$out1") or die"cannot open the file $out1\n";
 my (@tab,$codeF, $codeM, $j, $contig, $marker, $nbr_indiv, $nbr_markerF, $nbr_markerM, $F, $M, $marker_miror, $pos, $femelle, $male, $classe, $segregation);
 $j = 0;
 
-my $head = <F>;
+my $head = <F>; 
 while(my $line =<F>){
 	chomp $line;
 	my @head = split (/\t/, $head);
@@ -555,11 +575,27 @@ Fully compatble with any perl version
 
 =head1 DATE
 
-[% DATE %]
+25.06.2014
 
 =head1 LICENSE AND COPYRIGHT
 
-<Please cite Cirad AGAP Data Integration team, if you use this module.
-Thank you!> 
+  abTOah.pl
+  
+  Copyright 2014 INRA-CIRAD
+  
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301, USA.
 
 =cut
