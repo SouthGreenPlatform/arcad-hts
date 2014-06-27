@@ -95,6 +95,8 @@ unless (@ARGV)
 
 my ($man, $help, $debug, $fasta, $prefix, $annot, $stat, @blast_name, @blast_file, $output);
 
+$prefix="";
+
 # parse options and print usage if there is a syntax error.
 #--- see doc at http://perldoc.perl.org/Getopt/Long.html
 GetOptions("help|?"     => \$help,
@@ -159,7 +161,7 @@ while( my $seq = $fasta_handle->next_seq() )
                                 -score  => 1,
                                  );
 }
-#Parser chaque XML et commencer à ajouter les Dbxref et annotation
+#Parse each XML and start adding Dbxref and annotation fields
 for(my $i=0;$i<scalar(@blast_name);$i++)
 {
   my $blast_handle = new Bio::SearchIO(-format => 'blastxml', 
@@ -219,11 +221,30 @@ for(my $i=0;$i<scalar(@blast_name);$i++)
 }
 
 
-#Parser Blast2GO et ajouter ontology_term
+#Parse Blast2GO and add ontology_term
 
-#Parser stat et remplir rpkm cds potential frameshift
+my $b2g_handle;
+if(defined $annot)
+{
+	if(open($b2g_handle, $annot))
+	{
+		while(my $line=<$b2g_handle>)
+		{
+			my @splitted = split(/\t/, $line);
+			my $id = $splitted[0];
+			my $go = $splitted[1];
+			$features{$id}->add_tag_value("Ontology_term",$go);
+		}
+	}
+	else
+	{
+		print("Cannot open $annot");
+		exit(0);
+	}
+}
+#Parse stat and fill cds potential frameshift
 
-#Remplir output
+#Write output
 my $gff_handle = new Bio::Tools::GFF(-gff_version => 3,
                                      -file => ">".$output);
 my $output_handle;
@@ -266,8 +287,8 @@ Fully compatible with any perl version
 
 =head1 LICENSE AND COPYRIGHT
 
-  Copyright 2014 INRA-CIRAD
-  
+  Copyright 2014 INRAs
+ 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
