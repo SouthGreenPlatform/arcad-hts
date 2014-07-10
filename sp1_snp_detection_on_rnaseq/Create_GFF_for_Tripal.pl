@@ -244,6 +244,42 @@ if(defined $annot)
 }
 #Parse stat and fill cds potential frameshift
 
+my $stat_handle;
+if(defined $stat)
+{
+	if(open($stat_handle, $stat))
+	{
+		#First parse header
+		my %header;
+		my $line = <$stat_handle>;
+		my @splitted_header = split(/\t/, $line);
+		
+		for(my $i =0; $i<scalar(@splitted_header); $i++)
+		{
+			$header{$splitted_header[$i]}=$i;
+		}
+		
+		#Parse other lines to extract information
+		while($line = <$stat_handle>)
+		{
+			my @splitted = split(/\t/, $line);
+			my $id = $splitted[$header{"Contig"}];
+			my $cds_start = $splitted[$header{"CDS start"}];
+			my $cds_stop = $splitted[$header{"CDS end"}];
+			my $method = $splitted[$header{"p4e method"}];
+			my $shift = "N";
+			if((abs($cds_stop - $cds_start)-1)%3 !=0)
+			{
+				$shift="Y";
+			}
+			
+			$features{$id}->add_tag_value("cds",$cds_start.",".$cds_stop);
+			$features{$id}->add_tag_value("p4e method",$method);
+			$features{$id}->add_tag_value("frameshift",$shift);
+ 		}
+	}
+}
+
 #Write output
 my $gff_handle = new Bio::Tools::GFF(-gff_version => 3,
                                      -file => ">".$output);
@@ -287,7 +323,7 @@ Fully compatible with any perl version
 
 =head1 LICENSE AND COPYRIGHT
 
-  Copyright 2014 INRAs
+  Copyright 2014 INRA
  
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -307,4 +343,3 @@ Fully compatible with any perl version
 
 =cut
 
-=cut
