@@ -153,13 +153,15 @@ my %features;
 
 while( my $seq = $fasta_handle->next_seq() )
 {
-  my $name= $seq->display_name();
-  $features{$name} = new Bio::SeqFeature::Generic ( -start => 1, -end => $seq->length(),
+	my $name= $seq->display_name();
+	$features{$name} = new Bio::SeqFeature::Generic ( -start => 1, -end => $seq->length(),
                                 -strand => 1, -primary => 'mRNA',
                                 -source_tag   => 'Abyss_Cap3',
 				-seq_id => $prefix."_".$seq->display_name(),
                                 -score  => 1,
                                  );
+    $features{$name}->add_tag_value("ID",$prefix."_".$name);
+    $features{$name}->add_tag_value("Name",$prefix."_".$name);
 }
 #Parse each XML and start adding Dbxref and annotation fields
 for(my $i=0;$i<scalar(@blast_name);$i++)
@@ -273,7 +275,7 @@ if(defined $stat)
 				$shift="Y";
 			}
 			
-			$features{$id}->add_tag_value("cds",$cds_start.",".$cds_stop);
+			$features{$id}->add_tag_value("cds",$cds_start."..".$cds_stop);
 			$features{$id}->add_tag_value("p4e method",$method);
 			$features{$id}->add_tag_value("frameshift",$shift);
  		}
@@ -288,7 +290,6 @@ my $output_handle;
 foreach my $key (keys(%features))
 {
   $gff_handle->write_feature($features{$key});
-  #print $output_handle $features{$key}->gff_string()."\n";
 }
 
 $gff_handle->close();
