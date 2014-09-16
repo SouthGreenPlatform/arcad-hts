@@ -139,7 +139,7 @@ my %GATK_RealignerTargetCreator = (
 	'-o'      => sub{ mkdir "$opt_o/$realignment_dir/"; return "$opt_o/$realignment_dir/RTC.intervals";},
 	'-known'  => \@opt_known,
 	'-T'      => 'RealignerTargetCreator',
-#	'-fixMisencodedQuals'=>'',
+	'-fixMisencodedQuals'=>'',
 	%GATK_Input,
 );
 
@@ -149,7 +149,7 @@ my %GATK_IndelRealigner = (
 	'-known'  => \@opt_known,
 	'-T'      => 'IndelRealigner',
 	'-targetIntervals' => $GATK_RealignerTargetCreator{'-o'},
-#	'-fixMisencodedQuals'=>'',
+	'-fixMisencodedQuals'=>'',
 	%GATK_Input,
 );
 
@@ -231,7 +231,7 @@ $o_bam->indexBam;
 	$reference =~ s/.fa//;
 	if(! -e "$reference.dict")
 	{
-		my $command = "$JAVA_PATH -jar $PICARD_TOOLS_DIRECTORY/CreateSequenceDictionary.jar R= $opt_reference O= $reference.dict ";
+		my $command = "$JAVA_PATH -jar $PICARD_TOOLS_DIRECTORY/CreateSequenceDictionary.jar R=$opt_reference O=$reference.dict ";
 		#print "\t$command\n";
 		system($command);
 	}
