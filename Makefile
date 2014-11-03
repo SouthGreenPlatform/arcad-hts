@@ -15,6 +15,7 @@ install:
 dist:
 	mkdir -p arcad-hts-${VERSION}
 	cp AUTHORS LICENSE Makefile README TODO arcad-hts-${VERSION}/
+	cp -r sp1_snp_detection_on_rnaseq/ arcad-hts-${VERSION}/
 	cp -r sp5_gbs/ arcad-hts-${VERSION}/
 	tar -czvf arcad-hts-${VERSION}.tar.gz arcad-hts-${VERSION}/
 	rm -rf arcad-hts-${VERSION}
