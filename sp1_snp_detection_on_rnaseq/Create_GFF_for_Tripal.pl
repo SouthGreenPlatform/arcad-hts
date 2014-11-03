@@ -285,7 +285,6 @@ if(defined $stat)
 #Write output
 my $gff_handle = new Bio::Tools::GFF(-gff_version => 3,
                                      -file => ">".$output);
-my $output_handle;
 
 foreach my $key (keys(%features))
 {

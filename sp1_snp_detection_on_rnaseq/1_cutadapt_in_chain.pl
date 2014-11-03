@@ -243,11 +243,10 @@ if(defined($b))
 my $i=0;
 foreach my $fastq (@$ra_files)
 {
-	print "fastq : $fastq\n";
-	print "8\n";
+	
 	my($file, $path, $ext) = fileparse($fastq, qr/\.[^.]*/);
 	$file .= $ext;
-	print "9\n";
+	
 	my $spe_adapters="";
 	if(defined($sa))
 	{
@@ -261,7 +260,6 @@ foreach my $fastq (@$ra_files)
 		$adaptersTmp =~ s/\// -b /g;
 		$spe_adapters .= ' -b '.$adaptersTmp;
 	}
-	print "10\n";
 	my $output_path;
 	if(defined($output)){
 		$output_path="$output/$file";

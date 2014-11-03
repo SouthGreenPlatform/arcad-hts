@@ -9,6 +9,7 @@ check:
 
 install:
 	mkdir -p ${INSTALL}/bin
+	cp sp1_snp_detection_on_rnaseq/* ${INSTALL}/bin/
 	cp sp5_gbs/* ${INSTALL}/bin/
 
 dist:
