@@ -1,0 +1,4 @@
+AAGT	indiv_1
+CAGT	indiv_2
+TGAC	indiv_2
+*   rebut
