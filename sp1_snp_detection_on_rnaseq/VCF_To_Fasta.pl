@@ -25,7 +25,7 @@
 
 =head1 VCF to Fasta
 
-Reconstruct a fasta from a VCF file
+Reconstruct a fasta from a VCF file. Reconstruct a fasta file for each sample specified.
 
 =head1 SYNOPSIS
 
@@ -65,7 +65,7 @@ The input BAM file used for the SNP Calling. Only SNP with flag PASS will be use
 
 =item B<[-c]> ([an integer): 
 
-Coverage trheshold. Positions having coverage below this threshold will be replace by a N
+Coverage trheshold. Positions having coverage below this threshold in a sample will be replace by a N in this sample's fasta
 
 =item B<[-o]> ([a directory]): 
 
@@ -75,9 +75,10 @@ The output directory. This directory will contain the output fasta file. Fasta f
 
 The reference fasta file. The reference file used for the mapping and the SNP_Calling
 
-=item B<[-ind_prefix]> ([a string])
+=item B<[-ind_name]> ([a string])
 
-A prefix to allowing to groups sample. Can be specified more than once.
+Sample name for which a fasta file will be created. Can be specified more than once.
+If this is not set, then all samples will be extracted.
 
 =item B<[-L]> ([a interval file]): 
 
@@ -116,6 +117,7 @@ my $INTERSECTBED_PATH="/usr/local/bioinfo/bedtools/bin/intersectBed";
 #options processing
 my ($man, $help, $debug, $vcf, $bam, $output, $ref, @prefix, $depth, $intervals);
 $depth = 10;
+$debug = 0;
 # parse options and print usage if there is a syntax error.
 #--- see doc at http://perldoc.perl.org/Getopt/Long.html
 GetOptions("help|?"     => \$help,
@@ -142,11 +144,6 @@ if(! -e $ref)
   print("Cannot find $ref");
   pod2usage(0);
 }
-if(@prefix <1)
-{
-  print("You did not precise any sample groups");
-  pod2usage(0);
-}
 
 if(! -e $output)
 {
@@ -157,11 +154,41 @@ my $vcf_handle;
 my $output_handle;
 my %groups_id;
 $|++;
-my $tmp = "tmp_7292";
+my $tmp = "tmp_".$$;
 mkdir $tmp;
 
+#If no prefix were indicated, all samples from the VCF will be extracted
+if(@prefix <1)
+{
+  if (open($vcf_handle, $vcf))
+  {
+    while(<$vcf_handle>)
+    {
+      if($_ =~ /^#/)
+	  {
+        if($_ =~ /^#CHROM/)
+	    {
+		  chomp();
+	      my @splitted = split(/\t/);  
+		  for(my $i = 9;$i<@splitted;$i++)
+		  {
+		    my $group = $splitted[$i];
+		    push(@prefix, $group);
+		    push(@{$groups_id{$group}},$i);  
+		  }
+        }
+	  }
+    }
+  }
+  else
+  {
+    print "Cannot open $vcf";
+    exit();
+  }
+}
+
 #Get sample positions in the VCF file
-if (open($vcf_handle, $vcf))
+elsif (open($vcf_handle, $vcf))
 {
   while(<$vcf_handle>)
   {
@@ -191,9 +218,14 @@ else
 }
 close($vcf_handle);
 
+
 #Create a vcf file focused on the given intervals
 
-#system("$INTERSECTBED_PATH -a $vcf -b $intervals >$tmp/intervals.vcf");
+if(defined($intervals))
+{
+	system("$INTERSECTBED_PATH -a $vcf -b $intervals >$tmp/intervals.vcf");
+}
+
 
 #Create the fasta for each given intervals
 
@@ -233,7 +265,8 @@ $numerical_id=0;
 
 foreach my $group (@prefix)
 {
-  open(SEQ, ">$output/$group.fasta");
+  my $fasta_handle;
+  open($fasta_handle, ">$output/$group.fasta");
   
 #  For each interval
   if (open($intervals_handle, "$intervals"))
@@ -289,18 +322,28 @@ foreach my $group (@prefix)
      close($vcf_handle);
    
    #Create BAM
-   
-     system("$SAMTOOLS_PATH view -b  $bam $interval>$tmp/tmp.bam && $SAMTOOLS_PATH index $tmp/tmp.bam");
+	 if($debug >0)
+	 {
+		print "Launched:\n"."$SAMTOOLS_PATH view -r $group -h -b  $bam $interval>$tmp/tmp.bam && $SAMTOOLS_PATH index $tmp/tmp.bam\n";
+	 }
+     system("$SAMTOOLS_PATH view -r $group -h -b  $bam $interval>$tmp/tmp.bam && $SAMTOOLS_PATH index $tmp/tmp.bam");
    #Create depth
      system("$SAMTOOLS_PATH depth -r $interval $tmp/tmp.bam >$tmp/tmp.dp");
    #Replace by N where depth is below threshold
      my $depth_handle;
-     if(open($depth_handle,"$tmp/tmp.dp" ))
+   #If the depth file is empty, then we replace all the sequence by N's
+     if(-e "$tmp/tmp.dp" && -z "$tmp/tmp.dp")
+     {
+		 $nucleotide =~ tr/ACGTMRWSYKacgtmrwsyk/N/ ;
+	 }
+     elsif(open($depth_handle,"$tmp/tmp.dp" ))
      {
         my $line = <$depth_handle>;
         my @dp_field = split("\t", $line);
         my $pos = $dp_field[1] - $splitted[1] ;
-        if( $pos != 0)
+       #if the first line of the depth file does not correpond to the
+       #beginning of the sequence, then replace all the beginning by N's
+       if( $pos != 0)
         {
           for(my $i=0; $i<$pos;$i++)
           {
@@ -341,18 +384,19 @@ foreach my $group (@prefix)
           }
           $old = $pos;
         }
+        close($depth_handle);
       }
       else
       {
         print "Cannot open $tmp/tmp.dp";
         exit();
       }
-      close($depth_handle);
-      print SEQ ">".$name."\n".$nucleotide."\n";
+      
+      print $fasta_handle ">".$name."\n".$nucleotide."\n";
     }
   }
   close($intervals_handle);
-  close(SEQ);
+  close($fasta_handle);
 }
 
 
