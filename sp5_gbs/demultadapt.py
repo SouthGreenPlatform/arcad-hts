@@ -31,6 +31,7 @@ COPYRIGHT
 """
 
 import sys, os
+sys.path.append("")
 from davem_fastq import Fastq_read, Fastq_file
 import argparse
 from itertools import izip
