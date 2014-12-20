@@ -16,6 +16,7 @@ COPYRIGHT
 """
 
 import sys
+import zipfile
 
 __version__ = "0.0.2"
 
@@ -100,33 +101,37 @@ class Fastq_read( object ) :
         return "<fastq read '%s' at 0x%x>" % ( self.name, id( self ) )
 
 
-class Fastq_file( file ) :
+class Fastq_file(file) :
     """
     Pour manipuler les fichiers fastq.
     """
-    def __init__( self, path, mode ) :
-       file.__init__( self, path, mode )
-       self.seq_already_write = False
+    def __init__(self, path, mode):
+        if 'r' in mode and zipfile.is_zipfile(path):
+            zip_file = zipfile.ZipFile(path, "r")
+            self._file = zip_file.open(zip_file.filelist[0], "r")
+        else:
+            self._file = open(path, mode)
+        
+        self.seq_already_write = False
 
     def __iter__( self ) :
         return self
  
-    def readline( self ) :
+    def readline(self) :
         """
         extraire la sequence suivante du fichier.
         """
-        r =  super( Fastq_file, self ).readline()
-        r += super( Fastq_file, self ).readline()
-        r += super( Fastq_file, self ).readline()
-        r += super( Fastq_file, self ).readline()
+        r =  self._file.readline()
+        r += self._file.readline()
+        r += self._file.readline()
+        r += self._file.readline()
         return r
 
-
     def next( self ) :
-        r =  super( Fastq_file, self ).next()
-        r += super( Fastq_file, self ).next()
-        r += super( Fastq_file, self ).next()
-        r += super( Fastq_file, self ).next()
+        r =  self._file.next()
+        r += self._file.next()
+        r += self._file.next()
+        r += self._file.next()
         return r
 
     def write( self, seq ) :
@@ -135,9 +140,9 @@ class Fastq_file( file ) :
         sans aucun autre \n
         """
         if self.tell() == 0 :
-           super( Fastq_file, self ).write( seq )
+           self._file.write( seq )
         else :
-           super( Fastq_file, self ).write( "\n" + seq )
+           self._file.write( "\n" + seq )
             
     def sort( self, path ) :
         """
