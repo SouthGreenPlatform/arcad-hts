@@ -31,7 +31,6 @@ COPYRIGHT
 """
 
 import sys, os
-print os.getcwd()
 sys.path.append("")
 from davem_fastq import Fastq_read, Fastq_file
 import argparse
