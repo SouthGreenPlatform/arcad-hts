@@ -109,27 +109,27 @@ function cmp_or_quit {
 
 function run () {
     cwd=$(pwd)
-    cd "${pathToArcadHtsDir}/tests"
+    cd "${pathToArcadHtsDir}/tests/demultadapt"
     
     # step 1 ------------------------------------------------------------------
     if [ $verbose -gt "0" ]; then
         echo -e "check presence of input data..."
     fi
-    if [ ! -f "${pathToArcadHtsDir}/tests/demultadapt/indi_A_1.fastq" ]; then
+    if [ ! -f "indi_A_1.fastq" ]; then
         if [ $verbose -gt "0" ]; then
             echo -e "missing indi_A_1.fastq"
             exit 1
         fi
     fi
     
-    if [ ! -f "${pathToArcadHtsDir}/tests/demultadapt/indi_A_2.fastq" ]; then
+    if [ ! -f "indi_A_2.fastq" ]; then
         if [ $verbose -gt "0" ]; then
             echo -e "missing indi_A_2.fastq"
             exit 1
         fi
     fi
     
-    if [ ! -f "${pathToArcadHtsDir}/tests/demultadapt/adaptator.txt" ]; then
+    if [ ! -f "adaptator.txt" ]; then
         if [ $verbose -gt "0" ]; then
             echo -e "missing adaptator.txt"
             exit 1
@@ -151,12 +151,20 @@ function run () {
     
     export PYTHONPATH=${pathToArcadHtsDir}/lib:$PYTHONPATH
     
-    python ${pathToArcadHtsDir}/sp5_gbs/demultadapt.py -l 1.0 \
-        -f ${pathToArcadHtsDir}/tests/demultadapt/indi_A_1.fastq \
-        -F ${pathToArcadHtsDir}/tests/demultadapt/indi_A_2.fastq \
-        -p returned \
-        -v ${pathToArcadHtsDir}/tests/demultadapt/adaptator.txt \
-        > /dev/null
+    cmd="python"
+    cmd+=" ${pathToArcadHtsDir}/sp5_gbs/demultadapt.py"
+    cmd+=" -l 1.0"
+    cmd+=" -f ${pathToArcadHtsDir}/tests/demultadapt/indi_A_1.fastq"
+    cmd+=" -F ${pathToArcadHtsDir}/tests/demultadapt/indi_A_2.fastq"
+    cmd+=" -p returned"
+    cmd+=" -v ${pathToArcadHtsDir}/tests/demultadapt/adaptator.txt"
+    if [ $verbose -le "1" ]; then
+      cmd+=" > /dev/null"
+    fi
+    if [ $verbose -ge "1" ]; then
+      echo $cmd
+    fi
+    eval $cmd
     
     cmp_or_quit ${pathToArcadHtsDir}/tests/demultadapt/expected-indiv_1_1.fastq \
         returned-indiv_1_1.fastq 
@@ -176,11 +184,16 @@ function run () {
         echo -e "launch demultadapt single..."
     fi
     
-    python ${pathToArcadHtsDir}/sp5_gbs/demultadapt.py -l 1.0 \
-        -f ${pathToArcadHtsDir}/tests/demultadapt/indi_A_1.fastq \
-        -p returned \
-        -v ${pathToArcadHtsDir}/tests/demultadapt/adaptator.txt \
-        > /dev/null
+    cmd="python"
+    cmd+=" ${pathToArcadHtsDir}/sp5_gbs/demultadapt.py"
+    cmd+=" -l 1.0"
+    cmd+=" -f ${pathToArcadHtsDir}/tests/demultadapt/indi_A_1.fastq"
+    cmd+=" -p returned"
+    cmd+=" -v ${pathToArcadHtsDir}/tests/demultadapt/adaptator.txt"
+    if [ $verbose -le "1" ]; then
+      cmd+=" > /dev/null"
+    fi
+    eval $cmd
     
     cmp_or_quit ${pathToArcadHtsDir}/tests/demultadapt/expected-indiv_1.fastq \
         returned-indiv_1.fastq

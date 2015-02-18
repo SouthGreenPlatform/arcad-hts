@@ -1,9 +1,10 @@
-VERSION="0.1"
+VERSION="1.0.0" # http://semver.org/
 INSTALL=${HOME}
 PERL_LIB=${INSTALL}/lib
 PYTHON_LIB=${INSTALL}/lib
-LIBPE=$(shell mkdir -p ${PERL_LIB};cd ${PERL_LIB};pwd)
-LIBPY=$(shell mkdir -p ${PYTHON_LIB};cd ${PYTHON_LIB};pwd)
+LIBPE=$(shell mkdir -p ${PERL_LIB}; cd ${PERL_LIB}; pwd)
+LIBPY=$(shell mkdir -p ${PYTHON_LIB}; cd ${PYTHON_LIB}; pwd)
+
 all:
 	@echo "this package requires no compilation"
 
@@ -11,7 +12,6 @@ check:
 	@echo "this package doesn't have any test (yet)"
 
 install: 
-	
 	mkdir -p ${INSTALL}/bin
 	cp sp1_snp_detection_on_rnaseq/* ${INSTALL}/bin/
 	cp sp5_gbs/* ${INSTALL}/bin/
