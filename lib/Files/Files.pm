@@ -63,7 +63,7 @@ B<subfolder> boolean to specify, if search would be apply to subdirectories
 B<Array ref>
 
 =cut
-
+my @a_files;
 sub getFiles
 {
 	my $o_self = shift;
@@ -83,7 +83,9 @@ sub getFiles
 	}
 	
 	$list_command = `printf \"\%s\n\" \$($list_command)`;
-	my @a_files = split(/\n/, $list_command);
+
+	@a_files = (@a_files, split(/\n/, $list_command));
+	
 	return \@a_files;
 }
 

@@ -35,16 +35,20 @@ Launch Cutadapt on all fastq of a directory and its arborescence if requested. A
 
 cutadapt_in_chain.pl	-i input_folder \
 [-o output_folder] \
+[-zip|nozip] \
 [-sub|-nosub] \
 [-reverse|-noreverse] \
 [-a global_file_for_a_adapter] \
+[-g global_file_for_a_adapter] \
 [-b global_file_for_b_adapter] \
 [-sa specific_file_for_a_adapter] \
+[-sg specific_file_for_b_adapter] \
 [-sb specific_file_for_b_adapter] \
 [-q quality_level] \
 [-v overlap] \
 [-e error_rate] \
-[-m min_size_to_keep] 
+[-u number_of_bases_to_hard_trim] \
+[-queue SGE_queue]
 
 =cut
 
@@ -104,6 +108,11 @@ Default behavior is to have the Cutadapt outputs in the same directory as the fa
 -nosub disable this possibility
 Default: -sub is on
 
+=item B<[-zip|nozip]> ([flag to check subdirectory]) [-zip]
+
+-zip will compress output files with gzip
+-nozip will output fastq files
+Default: -zip is on
 
 =item B<[-reverse|-noreverse]> ([flag to reverse adapter sequences]) [-reverse]
 
@@ -118,6 +127,11 @@ This option defines the adapters to search at the end of the read in every fastq
 Adpater file must be in fasta format.
 At least one of -a/-b/-sa/-sb option must be specified
 
+=item B<[-g]> adapter file
+
+This option defines the adapters to search at the beginning of the read in every fastq file.
+Adpater file must be in fasta format.
+At least one of -a/-b/-sa/-sb option must be specified
 
 =item B<[-b]> adapter file
 
@@ -132,6 +146,11 @@ This option defines the adapters to search at the end of the read. Each director
 Adpater file must be in fasta format.
 At least one of -a/-b/-sa/-sb option must be specified
 
+=item B<[-sg]> adapter file
+
+This option defines the adapters to search at the beginning of the read. Each directory containing fastq file must contain an adapter file with this name.
+Adpater file must be in fasta format.
+At least one of -a/-b/-sa/-sb option must be specified
 
 =item B<[-sb]> adapter file
 
@@ -163,6 +182,18 @@ Default: 0.1
 Minimum read size to keep. Reads shorter than this value will be discarded
 Default: 20
 
+=item B<[-u]> bases to remove [0]
+
+The number of bases to remove from the read. A positive number will remove bases from the
+beginning of the read and a negative number from the end of the read. Can be specified 
+once for each sign 
+Default: No trimming
+
+=item B<[-queue]> SGE queue [bioinfo.q]
+
+The SGE queue to launch cutadapt
+Default: bioinfo.q
+
 =back
 
 =cut
@@ -171,8 +202,10 @@ my $CUTADAPT_PATH = &$Softwares::CUTADAPT_PATH or confess("$!");
 my $MAX_PARALLEL=12;
 
 #options processingcutadapt_in_chain.pl -man
-my ($man, $help, $debug, $input, $output, $subdirectory, $reverse, $a, $b, $sb, $sa, $quality, $overlap, $minsize, $error);
+my ($man, $help, $debug, $input, $output, $subdirectory, $reverse, $a, $g, $b, $sb, $sg, $sa, $quality, $overlap, $minsize, $error, $queue, @cut, $zipoutput);
+$queue = "bioinfo.q";
 $subdirectory=1;
+$zipoutput=1;
 $reverse=1;
 $quality=20;
 $overlap=7;
@@ -186,22 +219,27 @@ GetOptions(
 #	"debug:i"     => \$debug,
 	"input|i=s"   => \$input,
 	"output|o=s"  => \$output,
+	"zip!"        => \$zipoutput,
 	"sub!"        => \$subdirectory,
 	"reverse!"    => \$reverse,
 	"a=s"         => \$a,
+	"g=s"         => \$g,
 	"b=s"         => \$b,
 	"sb=s"        => \$sb,
+	"sb=s"        => \$sg,
 	"sa=s"        => \$sa,
 	"quality|q=i" => \$quality,
 	"overlap|v=i" => \$overlap,
 	"minsize|m=i" => \$minsize,
-	"error|e=f"   => \$error	
+	"error|e=f"   => \$error,
+	"cut|u=s"        => \@cut,	
+	"queue=s"     => \$queue
 ) or pod2usage(2);
 
 if ($help) {pod2usage(0);}
 if ($man) {pod2usage(-verbose => 2);}
 
-pod2usage(0) if(!(defined($a)||defined($b)||defined($sa)||defined($sb)));
+pod2usage(0) if(!(defined($a)||defined($b)||defined($sa)||defined($sb)||defined($sg)||defined($g)));
 
 if(defined($output) && -e $output && !(-d $output))
 {
@@ -219,12 +257,26 @@ elsif( -f $input ){
 elsif( -d $input )
 {
 	$ra_files = Files->getFiles( $input, '*.fastq', $subdirectory );
+	$ra_files = Files->getFiles( $input, '*.fq', $subdirectory );
+	$ra_files = Files->getFiles( $input, '*.fastq.gz', $subdirectory );
+	$ra_files = Files->getFiles( $input, '*.fq.gz', $subdirectory );
 	help "No FASTQ file(s) in input" if( 0 >= scalar @$ra_files );
 }
 else{
 	help "$! $input";
 }
-
+if(scalar(@cut) >2)
+{
+	help "You provided too many times the cut/u options";
+}
+elsif(scalar(@cut) == 2)
+{
+	if(($cut[0] > 0 && $cut[1] > 0) || ($cut[0] < 0 && $cut[1] < 0))
+	{
+		help "You provided too many times the cut/u options with the same sign";
+	}
+	
+}
 my $adapters="";
 if(defined($a))
 {
@@ -240,11 +292,19 @@ if(defined($b))
 	$adapters .= ' -b ' . $adaptersTmp;
 }
 
+if(defined($g))
+{
+	my $adaptersTmp = &readAdapters( "$g" );
+	$adaptersTmp =~ s/\// -g /g;
+	$adapters .= ' -g ' . $adaptersTmp;
+}
+
+
 my $i=0;
 foreach my $fastq (@$ra_files)
 {
 	
-	my($file, $path, $ext) = fileparse($fastq, qr/\.[^.]*/);
+	my($file, $path, $ext) = fileparse($fastq, qr/\.[^.]*[\.gz]?/);
 	$file .= $ext;
 	
 	my $spe_adapters="";
@@ -260,16 +320,38 @@ foreach my $fastq (@$ra_files)
 		$adaptersTmp =~ s/\// -b /g;
 		$spe_adapters .= ' -b '.$adaptersTmp;
 	}
-	my $output_path;
+	if(defined($sb))
+	{
+		my $adaptersTmp = &readAdapters( "$path/$sg" );
+		$adaptersTmp =~ s/\// -g /g;
+		$spe_adapters .= ' -g '.$adaptersTmp;
+	}
+	my ($output_path, $out_file);
+	
+	if($zipoutput && $ext !~ /\.gz$/)
+	{
+		$out_file = $file.".gz";
+	}
+	elsif(! $zipoutput && $ext =~ /\.gz$/)
+	{
+		$out_file = substr($file, -3);
+	}
+	
 	if(defined($output)){
-		$output_path="$output/$file";
+		$output_path="$output/$out_file";
 	}
 	else
 	{
-		my $out_fastq=$file;
-		$out_fastq=~s/\.fastq/\.cutadapt\.fastq/;
-		$output_path="$path/$out_fastq";
+		$out_file=~s/\.(f[ast]?q)/\.cutadapt\.$1/;
+		$output_path="$path/$out_file";
 	}
+	
+	my $cut;
+	foreach my $totrim (@cut)
+	{
+		$cut.= " -u $totrim";
+	}
+	
 	print "OK\n";
 	if($i>=$MAX_PARALLEL)
 	{
@@ -285,8 +367,8 @@ foreach my $fastq (@$ra_files)
 		}
 	}
 	
-	print STDERR ("qsub -q arcad.q -b yes -V -cwd -N cut_arcad $CUTADAPT_PATH $adapters $spe_adapters -o $output_path -q $quality -O $overlap -m $minsize -e $error $path/$file");
-	system("qsub -q arcad.q -b yes -V -cwd -N cut_arcad $CUTADAPT_PATH $adapters $spe_adapters -o $output_path -q $quality -O $overlap -m $minsize -e $error $path/$file");
+	print STDERR ("qsub -q $queue -b yes -V -cwd -N cut_arcad $CUTADAPT_PATH $adapters $spe_adapters $cut -o $output_path -q $quality -O $overlap -m $minsize -e $error $path/$file");
+	system("qsub -q $queue -b yes -V -cwd -N cut_arcad $CUTADAPT_PATH $adapters $spe_adapters $cut -o $output_path -q $quality -O $overlap -m $minsize -e $error $path/$file");
 	$i++;
 }
 
