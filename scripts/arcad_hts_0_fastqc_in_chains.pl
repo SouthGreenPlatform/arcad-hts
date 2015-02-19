@@ -93,6 +93,8 @@ If provided, FastQC outputs will be gather in this directory.
 
 =cut
 
+my $version="";
+
 unless (@ARGV)
 {
 	pod2usage({

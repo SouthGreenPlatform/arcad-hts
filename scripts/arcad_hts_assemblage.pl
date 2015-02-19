@@ -159,6 +159,8 @@ Prints detailled help and script documentation.
 
 =cut
 
+my $version="";
+
 my $number = "1"; # Numero d'etape
 
 my $man;

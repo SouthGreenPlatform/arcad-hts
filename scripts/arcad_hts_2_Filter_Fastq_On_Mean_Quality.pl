@@ -110,6 +110,8 @@ Print this help
 
 =cut
 
+my $version="";
+
 my ($man, $help, $ascii, $mean, $length, $fastq, $output) = (0, 0, 33, 30, 35, undef, './');
 my $pattern = '*.fastq';
 my $subdirectory = 0;

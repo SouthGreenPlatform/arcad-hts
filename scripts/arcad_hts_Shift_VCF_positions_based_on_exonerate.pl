@@ -70,6 +70,8 @@ A gff file containing the coordinate of the mRNA and its different exons.
 
 =cut
 
+my $version="";
+
 unless (@ARGV)
 {
   pod2usage(0);

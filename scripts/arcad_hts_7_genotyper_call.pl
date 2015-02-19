@@ -231,6 +231,8 @@ Check here for all possibility http://www.broadinstitute.org/gatk/gatkdocs/org_b
 
 =cut
 
+my $version="";
+
 my($phasing, $filtration);
 
 my $QUEUE = 'arcad.q';

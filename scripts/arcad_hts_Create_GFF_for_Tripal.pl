@@ -87,6 +87,7 @@ The gff output file
 
 =cut
 
+my $version="";
 
 unless (@ARGV)
 {

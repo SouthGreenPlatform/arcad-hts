@@ -64,6 +64,8 @@ The Illumina file can be in any type (Solexa, 1.3, 1.5, 1.8)
 
 	contact: $courriel\n\n";
 	
+	
+my $version="";	
 
 unless (@ARGV) 
 	{

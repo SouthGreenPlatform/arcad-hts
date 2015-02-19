@@ -86,6 +86,8 @@ An interval file in order to restrain the output to some positions. Each line mu
 
 =cut
 
+my $version="";
+
 unless (@ARGV)
 {
   pod2usage(0);

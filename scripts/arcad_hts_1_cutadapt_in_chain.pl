@@ -198,10 +198,11 @@ Default: bioinfo.q
 
 =cut
 
+my $version="";
 my $CUTADAPT_PATH = &$Softwares::CUTADAPT_PATH or confess("$!");
 my $MAX_PARALLEL=12;
 
-#options processingcutadapt_in_chain.pl -man
+#options processing 
 my ($man, $help, $debug, $input, $output, $subdirectory, $reverse, $a, $g, $b, $sb, $sg, $sa, $quality, $overlap, $minsize, $error, $queue, @cut, $zipoutput);
 $queue = "bioinfo.q";
 $subdirectory=1;

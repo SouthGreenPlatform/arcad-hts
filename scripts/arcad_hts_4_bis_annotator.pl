@@ -171,6 +171,7 @@ Prints detailled help and script documentation.
 
 =cut
 
+my $version="";
 
 my($output, $help, $name, $man);
 my @databases;

@@ -117,6 +117,8 @@ This argument supports ROD files of the following types: BCF2, VCF, VCF3
 
 =cut
 
+my $version="";
+
 my  $bams = undef;
 my(@opt_I, $opt_reference, $opt_o, @opt_known, @opt_knownSites, @opt_L, $opt_maxiter, $opt_queue);
 my $min_variant_score = 10000;

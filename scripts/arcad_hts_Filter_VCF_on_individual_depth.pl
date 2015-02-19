@@ -81,6 +81,8 @@ Default: 0
 
 =cut
 
+my $version="";
+
 unless (@ARGV)
 {
   pod2usage(0);

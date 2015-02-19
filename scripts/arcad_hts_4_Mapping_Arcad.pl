@@ -93,6 +93,8 @@ Can be one of these : bwa, bwa_mem, gem
 
 =cut
 
+my $version="";
+
 pod2usage(0) unless (@ARGV);
 
 #options processing

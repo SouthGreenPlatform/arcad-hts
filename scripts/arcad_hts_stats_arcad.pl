@@ -77,6 +77,8 @@ This option can be set as many times as needed
 
 =cut
 
+my $version="";
+
 unless (@ARGV)
 {
   pod2usage(0);

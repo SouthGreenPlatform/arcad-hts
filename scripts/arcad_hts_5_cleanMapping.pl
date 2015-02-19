@@ -57,6 +57,8 @@ cleanMapping.pl --folder folder_algnSam/ --pattern *group1.sam [--maxMismatch ma
 
 =cut
 
+my $version="";
+
 use strict;
 use warnings;
 use Carp qw (cluck confess croak);
