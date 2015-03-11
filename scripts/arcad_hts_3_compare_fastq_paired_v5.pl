@@ -55,6 +55,7 @@ use Getopt::Long;
 use IO::Compress::Gzip qw(gzip $GzipError);
 use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
 use Time::HiRes qw( time );
+use Pod::Usage;
 
 #print the line when they are in buffer
 $|=1;
