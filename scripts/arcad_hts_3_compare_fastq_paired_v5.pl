@@ -34,66 +34,100 @@
 #The files contain pairs but are not truely paired, ie the first sequence of the 1st file did not correspond to the first on the 2nd file...
 #It will work for Fastq with one line for sequence, one line for qual ONLY
 
+=pod
+
+=head1 NAME
+
+compare_fastq_paired_v5 - Resynchronized Fastq paired files desynchonized by cleaning
+
+=head1 DESCRIPTION
+
+Resynchronized Fastq paired files desynchonized by cleaning
+
+=head1 SYNOPSIS / USAGE
+
+compare_fastq_paired_v5 -f R1_file -r R2_file [-of R1_output] [-or R2_output] [-os unpaire_output]  
+
+=cut
 
 use strict;
 use Getopt::Long;
+use IO::Compress::Gzip qw(gzip $GzipError);
+use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
 use Time::HiRes qw( time );
 
 #print the line when they are in buffer
 $|=1;
 
 my $start_time =time();
-my $courriel="francois.sabot-at-ird.fr";
-my ($nomprog) = $0 =~/([^\/]+)$/;
-my $MessAbruti ="\nUsage:
-\t$nomprog -f forward_file -r reverse_file -of output_forward_file -or ouput_reverse_file -os output_single_file
-or
-\t$nomprog -forward forward_file -reverse reverse_file
 
-The script will output three files: forward_file.fastq, reverse_file.fastq and single.fastq, in the working dir.
-By default, output file has the same name as the input with 'paired' added before the extension
+pod2usage(0) unless (@ARGV);
 
-DESCRIPTION
+=head1 OPTIONS
 
-This script will compare two FASTQ files and check their homogeneity in term of forward-reverse.
-It is based on their name
-The non-paired sequences will be printed in a third file, and can be treated latter as single sequences.
-The files contain pairs but are not truely paired, ie the first sequence of the 1st file did not correspond to the first on the 2nd file...
-It will work for Fastq with one line for sequence, one line for qual ONLY
-The Illumina file can be in any type (Solexa, 1.3, 1.5, 1.8)
+=head2 required parameters
 
-	contact: $courriel\n\n";
-	
-	
+=over 1
+
+=item B<-f > (R1 Fastq file)
+
+Fastq file to proccess (can be fastq.gz)
+
+=item B<-r > (R2 Fastq file)
+
+Fastq file to proccess (can be fastq.gz)
+
+=back
+
+=head2 optional arguments
+
+=over 1
+
+=item B<-of > (R1 output Fastq file)
+
+Fastq file to proccess (can be fastq.gz)
+
+=item B<-or > (R2 output Fastq file)
+
+Fastq file to proccess (can be fastq.gz)
+
+=item B<-os > (unpaired Fastq file)
+
+Fastq file to proccess (can be fastq.gz)
+
+=item B<-? | --man | --help>
+
+Print this help
+
+=back
+
+=cut
+
 my $version="";	
 
-unless (@ARGV) 
-	{
-	print "\nType --help for more informations\n\n";
-	exit;
-	}
 
-my ($forward,$reverse,$output_forward,$output_reverse,$output_single,$help);
+my ($forward,$reverse,$output_forward,$output_reverse,$output_single,$help, $man);
 
-GetOptions("help|?|h" => \$help,	
+GetOptions("help|?|h" => \$help,
+		"man"        => \$man,
 		"f|forward=s"=>\$forward,
 		"r|reverse=s"=>\$reverse,
 		"of|output_forward=s"=>\$output_forward,
 		"or|output_reverse=s"=>\$output_reverse,
 		"os|output_single=s"=>\$output_single
-		);
-			
+		)or pod2usage(2);
+if ($help) {pod2usage(0);}
+if ($man) {pod2usage(-verbose => 2);}
 
 
-if ($help){print $MessAbruti; exit;}
 my ($forwardname,$reversename, $singlename);
 #Creating output names:
 if(!defined($output_forward))
 {
   my @forwardlist=split/\//,$forward;
   $forwardname=$forwardlist[-1];
-  $forwardname=~s/\.\w{1,}$//;
-  $forwardname.="_paired.fastq";
+  $forwardname=~s/\.\w{1,}(\.gz)?$//;
+  $forwardname.="_paired.fastq$1";
 }
 else
 {
@@ -104,8 +138,8 @@ if(!defined($output_reverse))
 {
   my @reverselist=split/\//,$reverse;
   $reversename=$reverselist[-1];
-  $reversename=~s/\.\w{1,}$//;
-  $reversename.="_paired.fastq";
+  $reversename=~s/\.\w{1,}(\.gz)?$//;
+  $reversename.="_paired.fastq$1";
 }
 else
 {
@@ -116,8 +150,8 @@ if(!defined($output_single))
 {
   my @forwardlist=split/\//,$forwardname;
   $singlename=$forwardlist[-1];
-  $singlename=~s/\.\w{1,}$//;
-  $singlename.="_single.fastq";
+  $singlename=~s/\.\w{1,}(\.gz)?$//;
+  $singlename.="_single.fastq$1";
 }
 else
 {
@@ -126,12 +160,30 @@ else
 
 print("Creating hash \n");
 #Gathering name and modifying them to be able to compare.
-my $comheadline="head -n 1 $forward";
+my $comheadline;
+if($forward =~ m/\.gz$/)
+{
+	$comheadline="zcat $forward |head -n 1 ";
+}
+else
+{
+	$comheadline="head -n 1 $forward";
+}
 my $headline=`$comheadline`;
 chomp $headline;
 $headline=substr($headline,0,4);
 
-my $comid="grep $headline $forward";
+my $comid;
+if($forward =~ m/\.gz$/)
+{
+	$comid="zcat $forward | sed -n '/$headline/ p' ";
+
+}
+else
+{
+	$comid="sed -n '/$headline/ p' $forward";
+
+}
 my $list_id_for= `$comid`;
 chomp $list_id_for;
 my @id_for=split/\n/,$list_id_for;
@@ -156,50 +208,94 @@ undef(@id_for);
 print(system("ps aux | grep $$"));
 
 #Reading and outputing
-open SINGLE,">$singlename" or die("\nCannot create $singlename file: $!\n");
-open REV, $reverse;
-open ROK, ">$reversename" or die ("\nCannot create $reversename file: $!\n");
+open(my $single_out_handle,">$singlename") or die("\nCannot create $singlename file: $!\n");
+if($singlename =~ m/\.gz$/)
+{
+	$single_out_handle = new IO::Compress::Gzip $single_out_handle or die "IO::Compress::Gzip failed: $GzipError\n";
+	$single_out_handle->autoflush(1);
+}
+my $reverse_handle;
+if($reverse =~ m/\.gz$/)
+{
+	$reverse_handle = new IO::Uncompress::Gunzip $reverse or die "gunzip failed: $GunzipError\n";
+}
+else
+{
+	open($reverse_handle,"$reverse") or die("\nCannot read $reverse file: $!\n");
+
+}
+my $reverse_out_handle;
+if($reversename =~ m/\.gz$/)
+{
+	$reverse_out_handle = new IO::Compress::Gzip $reversename or die "IO::Compress::Gzip failed: $GzipError\n";
+	$reverse_out_handle->autoflush(1);
+}
+else
+{
+	open($reverse_out_handle,">$singlename") or die("\nCannot create $reversename file: $!\n");
+
+}
 print "\nPrinting rev...\n";
 my %id_both;
-while (<REV>) #Writing forward correct
+while (<$reverse_handle>) #Writing forward correct
     {
     my $in=$_;
     chomp $in;
     my $idhere=$in;
     $idhere=~s/\/\d$//;
     $idhere=~s/\s\d:.+$//;
-    $in.="\n".<REV>.<REV>.<REV>;#Pick up the 4 lines
+    $in.="\n".<$reverse_handle>.<$reverse_handle>.<$reverse_handle>;#Pick up the 4 lines
     if (exists($idhash{$idhere})) #They are in the common list
         {
-        print ROK $in;
+        print $reverse_out_handle $in;
         delete($idhash{$idhere});
         $id_both{$idhere}++;        
         }
     else #They are not in the common list
         {
-        print SINGLE $in;
+        print $single_out_handle $in;
         }
     }
-close(REV);
-close(ROK);
+close $reverse_handle;
+close $reverse_out_handle;
 $duration=time() - $start_time;
 print("Reverse written. Duration: ". getDuration($duration)." \n");
 print(system("ps aux | grep $$"));
 
-open FOR, $forward;
-open FOK, ">$forwardname" or die ("\nCannot create $forwardname file: $!\n");
+my $forward_handle;
+if($forward =~ m/\.gz$/)
+{
+	$forward_handle = new IO::Uncompress::Gunzip $forward or die "gunzip failed: $GunzipError\n";
+}
+else
+{
+	open($forward_handle,"$forward") or die("\nCannot read $forward file: $!\n");
+
+}
+my $forward_out_handle;
+if($forwardname =~ m/\.gz$/)
+{
+	$forward_out_handle = new IO::Compress::Gzip $forwardname or die "IO::Compress::Gzip failed: $GzipError\n";
+	$forward_out_handle->autoflush(1);
+}
+else
+{
+	open($forward_out_handle,">$forwardname") or die("\nCannot create $forwardname file: $!\n");
+
+}
+
 print "\nPrinting for...\n";
-while (<FOR>) #Writing reverse correct
+while (<$forward_handle>) #Writing reverse correct
     {
     my $in=$_;
     chomp $in;
     my $idhere=$in;
     $idhere=~s/\/\d$//;
     $idhere=~s/\s\d:.+$//;
-    $in.="\n".<FOR>.<FOR>.<FOR>; #Pick up the 4 lines
+    $in.="\n".<$forward_handle>.<$forward_handle>.<$forward_handle>; #Pick up the 4 lines
     if ($id_both{$idhere}) #They are in the common list
         {
-        print FOK $in;
+        print $forward_out_handle $in;
         }
     else #They are not in the common list
         {
@@ -207,12 +303,12 @@ while (<FOR>) #Writing reverse correct
           {
            print "Check $idhere\n";
           }
-        print SINGLE $in;
+        print $single_out_handle $in;
         }
     }
-close(FOR);
-close(FOK);
-close(SINGLE);
+close $forward_handle;
+close $forward_out_handle;
+close $single_out_handle;
 
 $duration=time() - $start_time;
 print("Forward written. Duration: ". getDuration($duration)." \n");
