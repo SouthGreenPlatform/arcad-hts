@@ -87,6 +87,7 @@ sub new
 sub indexBam
 {
 	my $o_self = shift;
+	my $q = shift;
 	
 	for( @{$o_self->{bams}} )
 	{
@@ -94,6 +95,8 @@ sub indexBam
 		if( defined $bam && -e $bam )
 		{
 			my $bai = "${bam}.bai";
+			next if( -e $bai );
+			$bai =~ s/\.bam//;
 			next if( -e $bai );
 			if( $ENV{JOB_ID} )
 			{

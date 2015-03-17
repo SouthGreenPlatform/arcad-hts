@@ -123,7 +123,7 @@ our $ARCAD_SCRIPT_PATH              = sub {
 our $RH_QSUB = sub {
 	
 	return {
-		q    => 'arcad.q',
+		q    => 'bioinfo.q',
 		b    => 'y',
 		sync => 'y',
 		cwd  => '',

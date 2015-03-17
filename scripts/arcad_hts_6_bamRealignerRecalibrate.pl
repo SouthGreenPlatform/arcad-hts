@@ -120,7 +120,7 @@ This argument supports ROD files of the following types: BCF2, VCF, VCF3
 my $version="";
 
 my  $bams = undef;
-my(@opt_I, $opt_reference, $opt_o, @opt_known, @opt_knownSites, @opt_L, $opt_maxiter, $opt_queue);
+my(@opt_I, $opt_reference, $opt_o, @opt_known, @opt_knownSites, @opt_L, $opt_maxiter, $opt_queue, $fixMisencodedQuals);
 my $min_variant_score = 10000;
 my $keep_intermediate = 0;
 #-----------------------------------------------------
@@ -141,7 +141,6 @@ my %GATK_RealignerTargetCreator = (
 	'-o'      => sub{ mkdir "$opt_o/$realignment_dir/"; return "$opt_o/$realignment_dir/RTC.intervals";},
 	'-known'  => \@opt_known,
 	'-T'      => 'RealignerTargetCreator',
-	'-fixMisencodedQuals'=>'',
 	%GATK_Input,
 );
 
@@ -151,7 +150,6 @@ my %GATK_IndelRealigner = (
 	'-known'  => \@opt_known,
 	'-T'      => 'IndelRealigner',
 	'-targetIntervals' => $GATK_RealignerTargetCreator{'-o'},
-	'-fixMisencodedQuals'=>'',
 	%GATK_Input,
 );
 
@@ -178,13 +176,14 @@ my %GATK_PrintReads = (
 
 GetOptions(
 	"help|?|h" => sub{ help(); },
-	"input|I=s@"     => \@opt_I,
-	"R|reference=s"  => \$opt_reference,
-	"knownSites=s@"  => \@opt_knownSites,
-	"o|out=s"        => \$opt_o,
-	"known:s@"       => \@opt_known,
-	"L|intervals:s"  => \@opt_L,
-	"q|queue:s"      => \$opt_queue,
+	"input|I=s@"     	=> \@opt_I,
+	"R|reference=s"  	=> \$opt_reference,
+	"knownSites=s@"  	=> \@opt_knownSites,
+	"o|out=s"        	=> \$opt_o,
+	"known:s@"       	=> \@opt_known,
+	"L|intervals:s"  	=> \@opt_L,
+	"q|queue:s"      	=> \$opt_queue,
+	"fixMisencodedQuals!"	=> \$fixMisencodedQuals
 #	"Miter:i"        => \$opt_maxiter,
 #	"keep_intermediate" => \$keep_intermediate,
 );
@@ -228,9 +227,9 @@ $o_bam->indexBam;
 		system("samtools faidx $opt_reference");
 	}
 	my $reference = $opt_reference;
-	$reference =~ s/.fasta//;
-	$reference =~ s/.fas//;
-	$reference =~ s/.fa//;
+	$reference =~ s/\.fasta//;
+	$reference =~ s/\.fas//;
+	$reference =~ s/\.fa//;
 	if(! -e "$reference.dict")
 	{
 		my $command = "$JAVA_PATH -jar $PICARD_TOOLS_DIRECTORY/CreateSequenceDictionary.jar R=$opt_reference O=$reference.dict ";
@@ -238,7 +237,11 @@ $o_bam->indexBam;
 		system($command);
 	}
 #----------------------------------------------------------------------------
-
+if($fixMisencodedQuals)
+{
+	$GATK_RealignerTargetCreator{'-fixMisencodedQuals'}='';
+	$GATK_IndelRealigner{'-fixMisencodedQuals'}='';
+}
 qsub_command( &make_command(\%GATK_RealignerTargetCreator, $GATK_COMMAND), 0 );
 qsub_command( &make_command(\%GATK_IndelRealigner, $GATK_COMMAND), 0 );
 Bam->new( [$GATK_IndelRealigner{-o}] )->indexBam;
@@ -369,7 +372,7 @@ sub qsub_command
 	{
 		my $rh_qsub = &$Softwares::RH_QSUB; 
 		$$rh_qsub{q} = $opt_queue if( $opt_queue );
-		my $qsub = &Softwares::make_qsub_command( &$Softwares::RH_QSUB );
+		my $qsub = &Softwares::make_qsub_command( $rh_qsub );
 		if($debug){
 			print "$qsub '$command'\n";
 		}
