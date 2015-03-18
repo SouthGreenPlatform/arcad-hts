@@ -1,4 +1,4 @@
-VERSION=1.0.1# http://semver.org/
+VERSION=1.0.2# http://semver.org/
 INSTALL=${HOME}
 PERL_LIB=${INSTALL}/lib
 PYTHON_LIB=${INSTALL}/lib
@@ -15,12 +15,13 @@ install:
 	mkdir -p ${INSTALL}/bin
 	cp scripts/* ${INSTALL}/bin/
 	cp sp5_gbs/* ${INSTALL}/bin/
-	mkdir -p ${PERL_LIB}/Modules
-	cp -r lib/Config ${PERL_LIB}/Modules
-	cp -r lib/Files  ${PERL_LIB}/Modules
-	cp -r lib/Levenshtein ${PYTHON_LIB}
-	cp -r lib/davem_fastq* ${PYTHON_LIB}
+	mkdir -p ${LIBPE}/Modules
+	cp -r lib/Config ${LIBPE}/Modules
+	cp -r lib/Files  ${LIBPE}/Modules
+	cp -r lib/Levenshtein ${LIBPY}
+	cp -r lib/davem_fastq* ${LIBPY}
 	sed -i 's:/NAS/arcad_data/Softs/tags:'$(LIBPE)':' ${INSTALL}/bin/arcad_hts_*.pl
+	sed -i 's:/NAS/arcad_data/Softs/tags/:'${INSTALL}'/bin/:g' ${LIBPE}/Modules/Config/Softwares.pm
 	sed -i 's:version="";:version="'$(VERSION)'";:' ${INSTALL}/bin/arcad_hts_*.pl
 	sed -i 's:sys.path".append(""):sys.path.append("'$(LIBPY)'"):' ${INSTALL}/bin/*.py
 

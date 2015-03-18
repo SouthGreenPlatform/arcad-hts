@@ -1,5 +1,4 @@
-#!/usr/bin/perl
-
+#! /bin/env perl
 #  
 #  Copyright 2014 INRA-CIRAD-IRD
 #  

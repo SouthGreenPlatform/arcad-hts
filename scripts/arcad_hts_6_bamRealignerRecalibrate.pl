@@ -256,7 +256,7 @@ if( @opt_knownSites )
 else
 {
 	#Creer un fichier de recalibration
-#	my %unified = (-I => \@opt_I, -R => $GATK_Input{-R}, -o => "$opt_o.all.vcf");
+	
 	my %unified = (
 		-I => $GATK_PrintReads{-I}, 
 		-R => $GATK_Input{-R}, 
@@ -268,8 +268,7 @@ else
 		}
 	);
 	$unified{-L} = $GATK_Input{-L} if( exists $GATK_Input{-L} );
-	my $genotyper_call_script = &$Softwares::ARCAD_SCRIPT_PATH('7_genotyper_call.pl');
-	#qsub_command( &make_command(\%unified, "perl /home/homa/arcad/Softs/trunk/7_genotyper_call.pl --filtration --nophasing --standard_min_confidence_threshold_for_calling $min_variant_score --standard_min_confidence_threshold_for_emitting $min_variant_score"), 0);
+	my $genotyper_call_script = &$Softwares::ARCAD_SCRIPT_PATH('arcad_hts_7_genotyper_call.pl');
 	qsub_command( &make_command(\%unified, "perl $genotyper_call_script --filtration --nophasing --standard_min_confidence_threshold_for_calling $min_variant_score --standard_min_confidence_threshold_for_emitting $min_variant_score"), 0);
 	
 	# Filter PASS from vcf

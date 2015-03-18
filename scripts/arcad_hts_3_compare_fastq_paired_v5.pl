@@ -1,4 +1,4 @@
-#! /usr/bin/perl -w
+#! /bin/env perl
 
 #  
 #  Copyright 2014 INRA-CIRAD-IRD
@@ -51,6 +51,7 @@ compare_fastq_paired_v5 -f R1_file -r R2_file [-of R1_output] [-or R2_output] [-
 =cut
 
 use strict;
+use warnings;
 use Getopt::Long;
 use IO::Compress::Gzip qw(gzip $GzipError);
 use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
