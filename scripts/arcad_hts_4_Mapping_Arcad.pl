@@ -121,7 +121,7 @@ pod2usage({	-msg     => "Please set valid value for options -r and -i"
 	}
 ) if(!(defined($reference) && defined($conf_file) && defined($output)));
 	
-pod2usage({	-msg     => "Cannot find the reference file reference and/or config file\nPlease set valid value for options -r and -i"
+pod2usage({	-msg     => "Cannot find the reference file reference and/or config file and/or you did not set the output\nPlease set valid value for options -r and -i",
 		-exitval => 0
 	}
 )if( !(-e $reference && -e $conf_file) );
