@@ -46,7 +46,7 @@ Resynchronized Fastq paired files desynchonized by cleaning
 
 =head1 SYNOPSIS / USAGE
 
-compare_fastq_paired_v5 -f R1_file -r R2_file [-of R1_output] [-or R2_output] [-os unpaire_output]  
+compare_fastq_paired_v5 -f R1_file -r R2_file [-of R1_output] [-or R2_output] [-os unpaired_output]  
 
 =cut
 
@@ -129,7 +129,12 @@ if(!defined($output_forward))
   my @forwardlist=split/\//,$forward;
   $forwardname=$forwardlist[-1];
   $forwardname=~s/\.\w{1,}(\.gz)?$//;
-  $forwardname.="_paired.fastq$1";
+  $forwardname.="_paired.fastq";
+  if(defined($1))
+  {
+	  $forwardname.=$1;
+  }
+  
 }
 else
 {
@@ -141,7 +146,11 @@ if(!defined($output_reverse))
   my @reverselist=split/\//,$reverse;
   $reversename=$reverselist[-1];
   $reversename=~s/\.\w{1,}(\.gz)?$//;
-  $reversename.="_paired.fastq$1";
+  $reversename.="_paired.fastq";
+  if(defined($1))
+  {
+	  $reversename.=$1;
+  }
 }
 else
 {
@@ -153,7 +162,11 @@ if(!defined($output_single))
   my @forwardlist=split/\//,$forwardname;
   $singlename=$forwardlist[-1];
   $singlename=~s/\.\w{1,}(\.gz)?$//;
-  $singlename.="_single.fastq$1";
+  $singlename.="_single.fastq";
+  if(defined($1))
+  {
+	  $singlename.=$1;
+  }
 }
 else
 {
@@ -234,7 +247,7 @@ if($reversename =~ m/\.gz$/)
 }
 else
 {
-	open($reverse_out_handle,">$singlename") or die("\nCannot create $reversename file: $!\n");
+	open($reverse_out_handle,">$reversename") or die("\nCannot create $reversename file: $!\n");
 
 }
 print "\nPrinting rev...\n";
