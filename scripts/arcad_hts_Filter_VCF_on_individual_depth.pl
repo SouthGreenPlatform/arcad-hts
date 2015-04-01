@@ -91,7 +91,7 @@ unless (@ARGV)
 
 #options processing
 my ($man, $help, $debug, $input, $output, @prefix, @depth, @number, $mask_depth);
-
+$mask_depth=0;
 # parse options and print usage if there is a syntax error.
 #--- see doc at http://perldoc.perl.org/Getopt/Long.html
 GetOptions("help|?"     => \$help,
