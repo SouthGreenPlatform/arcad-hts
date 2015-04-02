@@ -60,48 +60,47 @@ C<$BWA_PATH> Lastest version of bwa, Version 0.5.9
 =cut
 
 our $PICARD_TOOLS_DIRECTORY = sub {
-	return '/home/sarah1/src/picard-tool' if( -d '/home/sarah1/src/picard-tool' );
+	return '/usr/local/bioinfo/picard-tools/1.130/picard.jar' if( -d '/usr/local/bioinfo/picard-tools/1.130/picard.jar' );
 	return;
 };
 
 our $GATK_DIRECTORY         = sub {
-	return '/usr/local/bioinfo/GATK' if( -d '/usr/local/bioinfo/GATK' );
+	return '/usr/local/bioinfo/GenomeAnalysisTK/3.3-0/GenomeAnalysisTK.jar' if( -d '/usr/local/bioinfo/GenomeAnalysisTK/3.3-0/GenomeAnalysisTK.jar' );
 	return;
 };
 
 our $JAVA_PATH              = sub {
-	return '/usr/local/jre/bin/java' if( -e '/usr/local/jre/bin/java' );
+	return '/usr/local/java/jre7/bin/java' if( -e '/usr/local/java/jre7/bin/java' );
 	return;
 };
 
 our $SAMTOOLS_PATH          = sub {
-	return '/usr/bin/samtools' if( -e '/usr/bin/samtools' );
+	return '/usr/local/bioinfo/samtools/1.2/bin/samtools' if( -e '/usr/local/bioinfo/samtools/1.2/bin/samtools' );
 	return;
 };
 
 our $BWA_PATH               = sub {
-	return '/usr/local/bioinfo/bwa/bwa' if( -e '/usr/local/bioinfo/bwa/bwa' );
+	return '/usr/local/bioinfo/bwa/0.7.12/bwa' if( -e '/usr/local/bioinfo/bwa/0.7.12/bwa' );
 	return;
 };
 
 our $CUTADAPT_PATH              = sub {
-	return '/usr/bin/cutadapt' if( -e '/usr/bin/cutadapt' );
+	return '/usr/local/bioinfo/python/3.4.3/bin/cutadapt' if( -e '/usr/local/bioinfo/python/3.4.3/bin/cutadapt' );
 	return;
 };
 
 our $ABYSS_PE_PATH              = sub {
-	return '/usr/local/bioinfo/abyss/bin/abyss-pe' if( -e '/usr/local/bioinfo/abyss/bin/abyss-pe' );
-	#return '/usr/local/bioinfo/abyss-1.3.2/bin/abyss-pe' if( -e '/usr/local/bioinfo/abyss-1.3.2/bin/abyss-pe' );
+	return '/usr/local/bioinfo/abyss/1.5.2/bin/abyss-pe' if( -e '/usr/local/bioinfo/abyss/1.5.2/bin/abyss-pe' );
 	return;
 };
 
 our $CAP3_PATH              = sub {
-	return '/usr/local/bioinfo/CAP3/cap3' if( -e '/usr/local/bioinfo/CAP3/cap3' );
+	return '/usr/local/bioinfo/CAP3/20150317/cap3' if( -e '/usr/local/bioinfo/CAP3/20150317/cap3' );
 	return;
 };
 
 our $FASTQC_PATH              = sub {
-	return "/usr/local/bioinfo/FastQC/fastqc -j " . &$JAVA_PATH if( -e '/usr/local/bioinfo/FastQC/fastqc' );
+	return "/usr/local/bioinfo/FastQC/0.11.2/fastqc -j " . &$JAVA_PATH if( -e '/usr/local/bioinfo/FastQC/0.11.2/fastqc' );
 	return;
 };
 
@@ -123,7 +122,7 @@ our $ARCAD_SCRIPT_PATH              = sub {
 our $RH_QSUB = sub {
 	
 	return {
-		q    => 'bioinfo.q',
+		q    => 'normal.q',
 		b    => 'y',
 		sync => 'y',
 		cwd  => '',
