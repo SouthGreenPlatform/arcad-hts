@@ -245,10 +245,10 @@ $NN = 0;
 # R : Missing data graph
 #-----------------------------------------------------
 			my $r_script= "GenotypeConcordance2.R";
-			my $path="./$r_script";
+			my $path="$r_script";
 			$jpg = $output."/".$b[$#b].".png";
 			$jpg =~ s/\.vcf//;
-			my $execute = `Rscript $path -n $out1 -jpg $jpg `;
+			my $execute = `$path -n $out1 -jpg $jpg `;
 			print $? if $?;
 			print $execute,"\n";
 #-----------------------------------------------------
@@ -278,7 +278,7 @@ if($comp ne ''){
 			my $path="./$r_script";
 			$jpg = $output."/".$b[$#b].".png";
 			$jpg =~ s/\.vcf//;
-			my $execute = `Rscript $path -i $out -r $report `;
+			my $execute = `$path -i $out -r $report `;
 			print $? if $?;
 			print $execute,"\n";
 			sleep(10);
@@ -311,10 +311,10 @@ else{
 # R : Read GATK report
 #-------------------------------------------
 			my $r_script= "GenotypeConcordance.R";
-			my $path="./$r_script";
+			my $path="$r_script";
 			$jpg = $output."/".$b[$#b].".png";
 			$jpg =~ s/\.vcf//;
-			my $execute = `Rscript $path -i $out -r $report `;
+			my $execute = `$path -i $out -r $report `;
 			print $? if $?;
 			print $execute,"\n";
 #-------------------------------------------

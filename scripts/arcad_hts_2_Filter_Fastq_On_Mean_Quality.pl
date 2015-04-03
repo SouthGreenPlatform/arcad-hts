@@ -45,6 +45,8 @@ use Getopt::Long;
 use Pod::Usage;
 use File::Basename;
 use File::Spec::Functions;
+use IO::Compress::Gzip qw(gzip $GzipError);
+use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
 
 use lib '/NAS/arcad_data/Softs/tags';
 
@@ -71,12 +73,13 @@ pod2usage(0) unless (@ARGV);
 
 =item B<-f | --fastq> (Fastq file or directory)
 
-Fastq file to proccess
+Fastq file to proccess. Can be compressed with gzip
 
 =item B<-o | --output> (Output directory)
 
 Directory in wich all output files will be sent.
 Output files are same name as input with extension ".filtered"
+If input files are gzipped, output files will be gzipped
 
 =back
 
@@ -145,6 +148,7 @@ elsif( -f $fastq )
 elsif( -d $fastq )
 {
 	$ra_files = Files->getFiles( $fastq, $pattern, $subdirectory );
+	$ra_files = Files->getFiles( $fastq, $pattern.".gz", $subdirectory );
 	help "No FASTQ file(s) found" if( 0 >= scalar @$ra_files );
 }
 else{
@@ -160,6 +164,12 @@ foreach $fastq ( @$ra_files )
 	
 	if ( open(my $file_handle, $fastq) && open(my $output_handle,">$output") )
 	{
+		if($fastq =~ m/\.gz$/)
+		{
+			$output_handle = new IO::Compress::Gzip $output_handle or die "IO::Compress::Gzip failed: $GzipError\n";
+			$output_handle->autoflush(1);
+			$file_handle = new IO::Uncompress::Gunzip $file_handle or die "gunzip failed: $GunzipError\n";
+		}
 		my $score;
 		while(<$file_handle>)
 		{
