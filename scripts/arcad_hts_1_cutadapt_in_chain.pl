@@ -337,6 +337,10 @@ foreach my $fastq (@$ra_files)
 	{
 		$out_file = substr($file, -3);
 	}
+	else
+	{
+		$out_file = $file;
+	}
 	
 	if(defined($output)){
 		$output_path="$output/$out_file";
