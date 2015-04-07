@@ -116,15 +116,31 @@ GetOptions("help|?"     => \$help,
 ) or pod2usage(2);
 if ($help) {pod2usage(0);}
 if ($man) {pod2usage(-verbose => 2);}
-pod2usage({	-msg     => "Please set valid value for options -r and -i"
+pod2usage({	-msg     => "Please set valid value for options -r"
 		-exitval => 0
 	}
-) if(!(defined($reference) && defined($conf_file) && defined($output)));
+    ) if(!(defined($reference)));
+
+pod2usage({     -msg     => "Please set valid value for options -i"
+		    -exitval => 0
+	  }
+    ) if(!(defined($conf_file)));
+
+pod2usage({     -msg     => "Please set valid value for options -o"
+		    -exitval => 0
+	  }
+    ) if(!(defined($output)));
 	
-pod2usage({	-msg     => "Cannot find the reference file reference and/or config file and/or you did not set the output\nPlease set valid value for options -r and -i",
+pod2usage({	-msg     => "Cannot find the reference file \nPlease set valid value for option -r",
 		-exitval => 0
 	}
-)if( !(-e $reference && -e $conf_file) );
+)if( !(-e $reference || -e $reference.".ann") );
+
+pod2usage({     -msg     => "Cannot find the config file \nPlease set valid value for option -i",
+		-exitval => 0
+	  }
+    )if( !(-e $conf_file) );
+
 
 my %MAPPERS = (bwa => \&map_bwa, bwa_mem => \&map_bwa_mem );
 my $PICARD_TOOLS_DIRECTORY=&$Softwares::PICARD_TOOLS_DIRECTORY;
