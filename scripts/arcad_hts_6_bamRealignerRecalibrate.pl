@@ -232,7 +232,7 @@ $o_bam->indexBam;
 	$reference =~ s/\.fa//;
 	if(! -e "$reference.dict")
 	{
-		my $command = "$JAVA_PATH -jar $PICARD_TOOLS_DIRECTORY/CreateSequenceDictionary.jar R=$opt_reference O=$reference.dict ";
+		my $command = "$JAVA_PATH -jar $PICARD_TOOLS_DIRECTORY/picard.jar CreateSequenceDictionary R=$opt_reference O=$reference.dict ";
 		#print "\t$command\n";
 		system($command);
 	}

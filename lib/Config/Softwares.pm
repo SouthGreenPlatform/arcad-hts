@@ -60,12 +60,11 @@ C<$BWA_PATH> Lastest version of bwa, Version 0.5.9
 =cut
 
 our $PICARD_TOOLS_DIRECTORY = sub {
-	return '/usr/local/bioinfo/picard-tools/1.130/picard.jar' if( -d '/usr/local/bioinfo/picard-tools/1.130/picard.jar' );
+	return '/usr/local/bioinfo/picard-tools/1.130/' if( -d '/usr/local/bioinfo/picard-tools/1.130/' );
 	return;
 };
-
 our $GATK_DIRECTORY         = sub {
-	return '/usr/local/bioinfo/GenomeAnalysisTK/3.3-0/GenomeAnalysisTK.jar' if( -d '/usr/local/bioinfo/GenomeAnalysisTK/3.3-0/GenomeAnalysisTK.jar' );
+	return '/usr/local/bioinfo/GenomeAnalysisTK/3.3-0/' if( -d '/usr/local/bioinfo/GenomeAnalysisTK/3.3-0/' );
 	return;
 };
 

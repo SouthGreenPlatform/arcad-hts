@@ -244,12 +244,12 @@ sub map_bwa
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[BWA] Single end mapping OK\n\n\"" if( $debug );
 		}
-		print $com_handle $JAVA_PATH." -jar $PICARD_TOOLS_DIRECTORY/SortSam.jar I=$directory/$pattern.sam O=$directory/$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT\n\n";
+		print $com_handle $JAVA_PATH." -jar $PICARD_TOOLS_DIRECTORY/picard.jar SortSam I=$directory/$pattern.sam O=$directory/$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT\n\n";
 		print $com_handle "$TEST_BASH\n\n";
 		#print $com_handle "echo \"[PICARD] Sort $directory/$pattern.sam by coordinate OK\n\n\"" if( $debug );
 		if($rmdup)
 		{
-			print $com_handle "$JAVA_PATH -Xmx2g -jar $PICARD_TOOLS_DIRECTORY/MarkDuplicates.jar I=$directory/$bam_output O=$directory/$bam_output.tmp VALIDATION_STRINGENCY=SILENT MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 REMOVE_DUPLICATES=TRUE M=$bam_output.metrics \n";
+			print $com_handle "$JAVA_PATH -Xmx2g -jar $PICARD_TOOLS_DIRECTORY/picard.jar MarkDuplicates I=$directory/$bam_output O=$directory/$bam_output.tmp VALIDATION_STRINGENCY=SILENT MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 REMOVE_DUPLICATES=TRUE M=$bam_output.metrics \n";
 			print $com_handle "$TEST_BASH\n\n";
 			print $com_handle "mv -f $directory/$bam_output.tmp $directory/$bam_output\n";
 			print $com_handle "$TEST_BASH\n\n";
@@ -289,12 +289,12 @@ sub map_bwa_mem
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[BWA] Single end mapping OK\n\n\"" if( $debug );
 		}
-		print $com_handle $JAVA_PATH." -jar $PICARD_TOOLS_DIRECTORY/SortSam.jar I=$directory/$pattern.sam O=$directory/$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT\n\n";
+		print $com_handle $JAVA_PATH." -jar $PICARD_TOOLS_DIRECTORY/picard.jar SortSam I=$directory/$pattern.sam O=$directory/$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT\n\n";
 		print $com_handle "$TEST_BASH\n\n";
 		#print $com_handle "echo \"[PICARD] Sort $directory/$pattern.sam by coordinate OK\n\n\"" if( $debug );
 		if($rmdup)
 		{
-			print $com_handle "$JAVA_PATH -Xmx2g -jar $PICARD_TOOLS_DIRECTORY/MarkDuplicates.jar I=$directory/$bam_output O=$directory/$bam_output.tmp VALIDATION_STRINGENCY=SILENT MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 REMOVE_DUPLICATES=TRUE M=$bam_output.metrics \n";
+			print $com_handle "$JAVA_PATH -Xmx2g -jar $PICARD_TOOLS_DIRECTORY/picard.jar MarkDuplicates I=$directory/$bam_output O=$directory/$bam_output.tmp VALIDATION_STRINGENCY=SILENT MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 REMOVE_DUPLICATES=TRUE M=$bam_output.metrics \n";
 			print $com_handle "$TEST_BASH\n\n";
 			print $com_handle "mv -f $directory/$bam_output.tmp $directory/$bam_output\n";
 			print $com_handle "$TEST_BASH\n\n";
@@ -313,7 +313,7 @@ sub merge_mappings
 	my ($mappings,$output) = @_;
 	my $input="";
 	$input.="I=$_ " for( keys(%$mappings) );
-	my $command = $JAVA_PATH." -jar $PICARD_TOOLS_DIRECTORY/MergeSamFiles.jar $input O=$output MSD=true VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true SO=coordinate";
+	my $command = $JAVA_PATH." -jar $PICARD_TOOLS_DIRECTORY/picard.jar MergeSamFiles $input O=$output MSD=true VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true SO=coordinate";
 	system("qsub -q $queue -b yes -V -cwd -sync yes -N Merge $command");
 }
 	
