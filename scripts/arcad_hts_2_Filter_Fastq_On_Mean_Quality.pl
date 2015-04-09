@@ -78,7 +78,7 @@ Fastq file to proccess. Can be compressed with gzip
 =item B<-o | --output> (Output directory)
 
 Directory in wich all output files will be sent.
-Output files are same name as input with extension ".filtered"
+Output files are same name as input with extension preceded by  ".filtered"
 If input files are gzipped, output files will be gzipped
 
 =back
@@ -160,8 +160,9 @@ my $outputDir = $output;
 
 foreach $fastq ( @$ra_files )
 {
-	$output = catfile($outputDir, basename $fastq . '.filtered');
-	
+        my $out_file = $fastq;
+	$out_file =~ s/\.fastq/\.filtered.fastq/ ; 
+        $output = catfile($outputDir, basename $out_file);
 	if ( open(my $file_handle, $fastq) && open(my $output_handle,">$output") )
 	{
 		if($fastq =~ m/\.gz$/)
