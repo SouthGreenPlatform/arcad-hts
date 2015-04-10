@@ -204,7 +204,7 @@ my $MAX_PARALLEL=12;
 
 #options processing 
 my ($man, $help, $debug, $input, $output, $subdirectory, $reverse, $a, $g, $b, $sb, $sg, $sa, $quality, $overlap, $minsize, $error, $queue, @cut, $zipoutput);
-$queue = "bioinfo.q";
+$queue = "normal.q";
 $subdirectory=1;
 $zipoutput=1;
 $reverse=1;
@@ -227,7 +227,7 @@ GetOptions(
 	"g=s"         => \$g,
 	"b=s"         => \$b,
 	"sb=s"        => \$sb,
-	"sb=s"        => \$sg,
+	"sg=s"        => \$sg,
 	"sa=s"        => \$sa,
 	"quality|q=i" => \$quality,
 	"overlap|v=i" => \$overlap,
@@ -307,7 +307,7 @@ foreach my $fastq (@$ra_files)
 	
 	my($file, $path, $ext) = fileparse($fastq, qr/\.[^.]*[\.gz]?/);
 	$file .= $ext;
-	
+
 	my $spe_adapters="";
 	if(defined($sa))
 	{
@@ -317,11 +317,12 @@ foreach my $fastq (@$ra_files)
 	}
 	if(defined($sb))
 	{
-		my $adaptersTmp = &readAdapters( "$path/$sb" );
+
+	        my $adaptersTmp = &readAdapters( "$path/$sb" );
 		$adaptersTmp =~ s/\// -b /g;
 		$spe_adapters .= ' -b '.$adaptersTmp;
 	}
-	if(defined($sb))
+	if(defined($sg))
 	{
 		my $adaptersTmp = &readAdapters( "$path/$sg" );
 		$adaptersTmp =~ s/\// -g /g;
@@ -351,7 +352,7 @@ foreach my $fastq (@$ra_files)
 		$output_path="$path/$out_file";
 	}
 	
-	my $cut;
+	my $cut="";
 	foreach my $totrim (@cut)
 	{
 		$cut.= " -u $totrim";
