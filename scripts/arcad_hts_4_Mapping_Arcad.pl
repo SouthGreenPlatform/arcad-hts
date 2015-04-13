@@ -145,6 +145,7 @@ pod2usage({     -msg     => "Cannot find the config file \nPlease set valid valu
 my %MAPPERS = (bwa => \&map_bwa, bwa_mem => \&map_bwa_mem );
 my $PICARD_TOOLS_DIRECTORY=&$Softwares::PICARD_TOOLS_DIRECTORY;
 my $JAVA_PATH=&$Softwares::JAVA_PATH;
+my $SAMTOOLS_PATH=&$Softwares::SAMTOOLS_PATH;
 
 my $HEADER = "#! $ENV{SHELL}\n#\$ -q $queue\n";
 $HEADER .= <<'HEADER';
@@ -255,14 +256,21 @@ sub map_bwa
 			print $com_handle $BWA_SAMPE." -r \'\@RG\tID:".$rg."\tPL:ILLUMINA\tSM:".$rg."\' $reference $directory/$pattern.forward.sai $directory/$pattern.reverse.sai $forward $reverse > $directory/$pattern.sam\n\n";
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[BWA] Paired end mapping OK\n\n\"" if( $debug );
+			print $com_handle $SAMTOOLS_PATH." view -Sb -o $directory/$pattern.bam  $directory/$pattern.sam\n\n";
+			print $com_handle "$TEST_BASH\n\n";
+			print $com_handle $SAMTOOLS_PATH." fixmate $directory/$pattern.bam $directory/$pattern.fixed.bam && mv -f $directory/$pattern.fixed.bam $directory/$pattern.bam\n\n";
+			print $com_handle "$TEST_BASH\n\n";
+			print $com_handle $JAVA_PATH." -Xmx4g -jar $PICARD_TOOLS_DIRECTORY/picard.jar SortSam I=$directory/$pattern.bam O=$directory/$bam_output.tmp.bam SO=coordinate VALIDATION_STRINGENCY=SILENT && mv $directory/$bam_output.tmp.bam $directory/$bam_output\n\n";
+			print $com_handle "$TEST_BASH\n\n";
+			#print $com_handle "echo \"[PICARD] Sort $directory/$pattern.bam by coordinate OK\n\n\"" if( $debug );
 		}else{
 			print $com_handle $BWA_SAMSE." -r \'\@RG\tID:".$rg."\tPL:ILLUMINA\tSM:".$rg."\' $reference $directory/$pattern.forward.sai ".$forward." > $directory/$pattern.sam\n\n";
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[BWA] Single end mapping OK\n\n\"" if( $debug );
+			print $com_handle $JAVA_PATH." -Xmx4g -jar $PICARD_TOOLS_DIRECTORY/picard.jar SortSam I=$directory/$pattern.sam O=$directory/$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT\n\n";
+			print $com_handle "$TEST_BASH\n\n";
+			#print $com_handle "echo \"[PICARD] Sort $directory/$pattern.bam by coordinate OK\n\n\"" if( $debug );
 		}
-		print $com_handle $JAVA_PATH." -jar $PICARD_TOOLS_DIRECTORY/picard.jar SortSam I=$directory/$pattern.sam O=$directory/$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT\n\n";
-		print $com_handle "$TEST_BASH\n\n";
-		#print $com_handle "echo \"[PICARD] Sort $directory/$pattern.sam by coordinate OK\n\n\"" if( $debug );
 		if($rmdup)
 		{
 			print $com_handle "$JAVA_PATH -Xmx2g -jar $PICARD_TOOLS_DIRECTORY/picard.jar MarkDuplicates I=$directory/$bam_output O=$directory/$bam_output.tmp VALIDATION_STRINGENCY=SILENT MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 REMOVE_DUPLICATES=TRUE M=$bam_output.metrics \n";
@@ -283,6 +291,7 @@ sub map_bwa_mem
 	my($pattern, undef, undef) = fileparse($bam_output, qr/\.[^.]*/);
 	my $command_file="$pattern.sh";
 	my $BWA_PATH =&$Softwares::BWA_PATH;
+	my $BWA_MEM=$BWA_PATH . " mem -t 4";
 	# Cette ligne bash arrete l'execution d'un programme qui a foire à une etape
 	my $TEST_BASH = 'if [[ $? -gt 0 ]] ; then echo "program killed"; exit $?; fi';
 	
@@ -297,17 +306,26 @@ sub map_bwa_mem
 		print $com_handle "$HEADER\n";
 		if( defined $reverse && -e $reverse )
 		{
-			print $com_handle $BWA_PATH . " mem -C -M -R '\@RG\tID:$rg\tPL:ILLUMINA\tSM:$rg' $reference $forward $reverse > $directory/$pattern.sam\n\n";
+			print $com_handle $BWA_MEM . " -M -R '\@RG\tID:$rg\tPL:ILLUMINA\tSM:$rg' $reference $forward $reverse > $directory/$pattern.sam\n\n";
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[BWA] Paired end mapping OK\n\n\"" if( $debug );
+			print $com_handle $SAMTOOLS_PATH." view -Sb -o $directory/$pattern.bam $directory/$pattern.sam\n\n";
+			print $com_handle "$TEST_BASH\n\n";
+			print $com_handle $SAMTOOLS_PATH." fixmate $directory/$pattern.bam $directory/$pattern.fixed.bam && mv -f $directory/$pattern.fixed.bam $directory/$pattern.bam\n\n";
+			print $com_handle "$TEST_BASH\n\n";
+			print $com_handle $JAVA_PATH." -Xmx4g -jar $PICARD_TOOLS_DIRECTORY/picard.jar SortSam I=$directory/$pattern.bam O=$directory/$bam_output.tmp.bam SO=coordinate VALIDATION_STRINGENCY=SILENT && mv $directory/$bam_output.tmp.bam $directory/$bam_output\n\n";
+			print $com_handle "$TEST_BASH\n\n";
+			#print $com_handle "echo \"[PICARD] Sort $directory/$pattern.bam by coordinate OK\n\n\"" if( $debug );
 		}else{
-			print $com_handle $BWA_PATH . " mem -C -M -R '\@RG\tID:$rg\tPL:ILLUMINA\tSM:$rg' $reference $forward > $directory/$pattern.sam\n\n";
+			print $com_handle $BWA_MEM . " -M -R '\@RG\tID:$rg\tPL:ILLUMINA\tSM:$rg' $reference $forward > $directory/$pattern.sam\n\n";
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[BWA] Single end mapping OK\n\n\"" if( $debug );
+			print $com_handle $JAVA_PATH." -Xmx4g -jar $PICARD_TOOLS_DIRECTORY/picard.jar SortSam I=$directory/$pattern.sam O=$directory/$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT\n\n";
+			print $com_handle "$TEST_BASH\n\n";
+			#print $com_handle "echo \"[PICARD] Sort $directory/$pattern.bam by coordinate OK\n\n\"" if( $debug );
+			
 		}
-		print $com_handle $JAVA_PATH." -jar $PICARD_TOOLS_DIRECTORY/picard.jar SortSam I=$directory/$pattern.sam O=$directory/$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT\n\n";
-		print $com_handle "$TEST_BASH\n\n";
-		#print $com_handle "echo \"[PICARD] Sort $directory/$pattern.sam by coordinate OK\n\n\"" if( $debug );
+		
 		if($rmdup)
 		{
 			print $com_handle "$JAVA_PATH -Xmx2g -jar $PICARD_TOOLS_DIRECTORY/picard.jar MarkDuplicates I=$directory/$bam_output O=$directory/$bam_output.tmp VALIDATION_STRINGENCY=SILENT MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 REMOVE_DUPLICATES=TRUE M=$bam_output.metrics \n";
