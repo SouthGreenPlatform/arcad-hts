@@ -309,12 +309,10 @@ my $phase_out  = "${opt_o}_phased.vcf";
 #-----------------------------------------------------
 # EXECUTABLES path
 #-----------------------------------------------------
-my $java_opts = 'Xmx5g'; # Pour les tr\E8s gros fichiers, option inutile pour l'instant
+my $java_opts = 'Xmx4g'; # Pour les tr\E8s gros fichiers, option inutile pour l'instant
 my $JAVA_PATH = &$Softwares::JAVA_PATH or confess("$!");
-#my $GATK_DIR  = &$Softwares::GATK_DIRECTORY or confess("$!");
-#my $GATK_DIR  = "/usr/local/bioinfo/GenomeAnalysisTK-2.2-5-g3bf5e3f";
-my $GATK_DIR  = "/usr/local/bioinfo/GATK/";
-my $GATK_COMMAND = "$JAVA_PATH -jar $GATK_DIR/GenomeAnalysisTK.jar";
+my $GATK_DIR  = &$Softwares::GATK_DIRECTORY or confess("$!");
+my $GATK_COMMAND = "$JAVA_PATH $java_opts -jar $GATK_DIR/GenomeAnalysisTK.jar";
 my $SAMTOOLS_PATH = &$Softwares::SAMTOOLS_PATH or confess("$!");
 #-----------------------------------------------------
 

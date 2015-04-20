@@ -204,10 +204,10 @@ my $o_unified = sub
 #-----------------------------------------------------
 # EXECUTABLES path
 #-----------------------------------------------------
-my $java_opts = 'Xmx5g'; # Pour les très gros fichiers, option inutile pour l'instant
+my $java_opts = ' Xmx4g'; # Pour les très gros fichiers, option inutile pour l'instant
 my $JAVA_PATH = &$Softwares::JAVA_PATH or confess("$!");
 my $GATK_DIR  = &$Softwares::GATK_DIRECTORY or confess("$!");
-my $GATK_COMMAND = "$JAVA_PATH -jar $GATK_DIR/GenomeAnalysisTK.jar";
+my $GATK_COMMAND = "$JAVA_PATH $java_opts -jar $GATK_DIR/GenomeAnalysisTK.jar";
 my $PICARD_TOOLS_DIRECTORY=&$Softwares::PICARD_TOOLS_DIRECTORY;
 #-----------------------------------------------------
 
@@ -232,7 +232,7 @@ $o_bam->indexBam;
 	$reference =~ s/\.fa//;
 	if(! -e "$reference.dict")
 	{
-		my $command = "$JAVA_PATH -jar $PICARD_TOOLS_DIRECTORY/picard.jar CreateSequenceDictionary R=$opt_reference O=$reference.dict ";
+		my $command = "$JAVA_PATH $java_opts -jar $PICARD_TOOLS_DIRECTORY/picard.jar CreateSequenceDictionary R=$opt_reference O=$reference.dict ";
 		#print "\t$command\n";
 		system($command);
 	}
