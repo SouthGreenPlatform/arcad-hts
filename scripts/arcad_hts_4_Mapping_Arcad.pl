@@ -29,7 +29,7 @@ Mapping_Arcad - Map Fastq Files on a reference and produce one merged BAM file
 
 =head1 SYNOPSIS
 
-mapping_arcad.pl -i conf_file -o bam_file -r reference_fasta_file -keep_intermediate -rmdup
+arcad_hts_4_Mapping_Arcad.pl -i conf_file -o bam_file -r reference_fasta_file -keep_intermediate -rmdup
 
 =cut
 
@@ -134,7 +134,7 @@ pod2usage({     -msg     => "Please set valid value for options -o"
 pod2usage({	-msg     => "Cannot find the reference file \nPlease set valid value for option -r",
 		-exitval => 0
 	}
-)if( !(-e $reference || -e $reference.".ann") );
+)if( !(-e $reference || ($mapper=~ m/bwa/ && -e $reference.".ann")) );
 
 pod2usage({     -msg     => "Cannot find the config file \nPlease set valid value for option -i",
 		-exitval => 0
@@ -148,12 +148,12 @@ my $JAVA_PATH=&$Softwares::JAVA_PATH;
 my $SAMTOOLS_PATH=&$Softwares::SAMTOOLS_PATH;
 
 my $HEADER = "#! $ENV{SHELL}\n#\$ -q $queue\n";
-$HEADER .= <<'HEADER';
-#$ -cwd
-#$ -V
-#$ -b yes
-#$ -pe parallel_smp 4
-#$ -N Map_Arc
+$HEADER .= <<"HEADER";
+#\$ -cwd
+#\$ -V
+#\$ -b yes
+#\$ -pe parallel_smp 4
+#\$ -N Map_$$
 
 HEADER
 
@@ -200,7 +200,7 @@ if (open(my $conf_handle, $conf_file))
 	close($conf_handle);
 	
 	#Wait for all mapping to end
-	sleep(10) while( (my $cnt =`qstat|grep -c "Map_Arc"`) > 0 );
+	sleep(10) while( (my $cnt =`qstat|grep -c "Map_$$"`) > 0 );
 	sleep(30);
 	
 	#merge the different bam_files
@@ -238,7 +238,7 @@ sub map_bwa
 	
 	if(! -e "$reference.ann")
 	{
-		system("qsub -q $queue -sync yes -b yes -N bwa_index bwa index -a is $reference");
+		system("qsub -q $queue -sync yes -b yes -N bwa_index $BWA_PATH index -a is $reference");
 		#print "[BWA] Indexing $reference OK\n" if( $debug );
 	}
 
@@ -297,7 +297,7 @@ sub map_bwa_mem
 	
 	if(! -e "$reference.ann")
 	{
-		system("qsub -q $queue -sync yes -b yes -N bwa_index bwa index -a is $reference");
+		system("qsub -q $queue -sync yes -b yes -N bwa_index $BWA_PATH index -a is $reference");
 		#print "[BWA] Indexing $reference OK\n" if( $debug );
 	}
 
@@ -347,7 +347,7 @@ sub merge_mappings
 	my ($mappings,$output) = @_;
 	my $input="";
 	$input.="I=$_ " for( keys(%$mappings) );
-	my $command = $JAVA_PATH." -jar $PICARD_TOOLS_DIRECTORY/picard.jar MergeSamFiles $input O=$output MSD=true VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true SO=coordinate";
+	my $command = $JAVA_PATH." -Xmx4g -jar $PICARD_TOOLS_DIRECTORY/picard.jar MergeSamFiles $input O=$output MSD=true VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true SO=coordinate";
 	system("qsub -q $queue -b yes -V -cwd -sync yes -N Merge $command");
 }
 	
