@@ -202,7 +202,8 @@ if (open(my $conf_handle, $conf_file))
 	#Wait for all mapping to end
 	sleep(10) while( (my $cnt =`qstat|grep -c "Map_$$"`) > 0 );
 	sleep(30);
-	
+	print "here";
+	`echo "Map_$$"`;
 	#merge the different bam_files
 	merge_mappings(\%mapping_files, $output) if( $out_extention eq '.bam' || $out_extention eq '.sam' );
 	rmtree($tmp_directory) if(!$keep_intermediate);
@@ -258,6 +259,8 @@ sub map_bwa
 			#print $com_handle "echo \"[BWA] Paired end mapping OK\n\n\"" if( $debug );
 			print $com_handle $SAMTOOLS_PATH." view -Sb -o $directory/$pattern.bam  $directory/$pattern.sam\n\n";
 			print $com_handle "$TEST_BASH\n\n";
+			print $com_handle "rm -f $directory/$pattern.sam\n\n" if(!$keep_intermediate);
+			print $com_handle "$TEST_BASH\n\n";
 			print $com_handle $SAMTOOLS_PATH." fixmate $directory/$pattern.bam $directory/$pattern.fixed.bam && mv -f $directory/$pattern.fixed.bam $directory/$pattern.bam\n\n";
 			print $com_handle "$TEST_BASH\n\n";
 			print $com_handle $JAVA_PATH." -Xmx4g -jar $PICARD_TOOLS_DIRECTORY/picard.jar SortSam I=$directory/$pattern.bam O=$directory/$bam_output.tmp.bam SO=coordinate VALIDATION_STRINGENCY=SILENT && mv $directory/$bam_output.tmp.bam $directory/$bam_output\n\n";
@@ -270,6 +273,8 @@ sub map_bwa
 			print $com_handle $JAVA_PATH." -Xmx4g -jar $PICARD_TOOLS_DIRECTORY/picard.jar SortSam I=$directory/$pattern.sam O=$directory/$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT\n\n";
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[PICARD] Sort $directory/$pattern.bam by coordinate OK\n\n\"" if( $debug );
+			print $com_handle "rm -f $directory/$pattern.sam\n\n" if(!$keep_intermediate);
+			print $com_handle "$TEST_BASH\n\n";
 		}
 		if($rmdup)
 		{
@@ -311,6 +316,8 @@ sub map_bwa_mem
 			#print $com_handle "echo \"[BWA] Paired end mapping OK\n\n\"" if( $debug );
 			print $com_handle $SAMTOOLS_PATH." view -Sb -o $directory/$pattern.bam $directory/$pattern.sam\n\n";
 			print $com_handle "$TEST_BASH\n\n";
+			print $com_handle "rm -f $directory/$pattern.sam\n\n" if(!$keep_intermediate);
+			print $com_handle "$TEST_BASH\n\n";
 			print $com_handle $SAMTOOLS_PATH." fixmate $directory/$pattern.bam $directory/$pattern.fixed.bam && mv -f $directory/$pattern.fixed.bam $directory/$pattern.bam\n\n";
 			print $com_handle "$TEST_BASH\n\n";
 			print $com_handle $JAVA_PATH." -Xmx4g -jar $PICARD_TOOLS_DIRECTORY/picard.jar SortSam I=$directory/$pattern.bam O=$directory/$bam_output.tmp.bam SO=coordinate VALIDATION_STRINGENCY=SILENT && mv $directory/$bam_output.tmp.bam $directory/$bam_output\n\n";
@@ -323,6 +330,8 @@ sub map_bwa_mem
 			print $com_handle $JAVA_PATH." -Xmx4g -jar $PICARD_TOOLS_DIRECTORY/picard.jar SortSam I=$directory/$pattern.sam O=$directory/$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT\n\n";
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[PICARD] Sort $directory/$pattern.bam by coordinate OK\n\n\"" if( $debug );
+			print $com_handle "rm -f $directory/$pattern.sam\n\n" if(!$keep_intermediate);
+			print $com_handle "$TEST_BASH\n\n";
 			
 		}
 		
