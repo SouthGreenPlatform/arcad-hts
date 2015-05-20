@@ -100,7 +100,7 @@ sub indexBam
 			next if( -e $bai );
 			if( $ENV{JOB_ID} )
 			{
-				$? = system( "$SAMTOOLS_PATH index $bam $bai" );
+				$? = system( "$SAMTOOLS_PATH index $bam " );
 				throw Error::Simple "Bam index creation failed : $!\njob id '$ENV{JOB_ID}'\n" if( !-e $bai && $? != 0 );
 			}
 			else
@@ -108,7 +108,7 @@ sub indexBam
 				my $rh_qsub = &$Softwares::RH_QSUB;
 				$$rh_qsub{N} = 'samtools_index';
 				my $qsub = &Softwares::make_qsub_command($rh_qsub);
-				$? = system( "$qsub '$SAMTOOLS_PATH index $bam $bai'" );
+				$? = system( "$qsub '$SAMTOOLS_PATH index $bam'" );
 				throw Error::Simple("Job 'samtools_index' failed, exit code $?") if( !-e $bai && $? != 0 );
 			}
 		}
