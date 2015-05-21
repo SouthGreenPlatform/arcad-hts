@@ -1,4 +1,4 @@
-VERSION=1.2.4# http://semver.org/
+VERSION=2.0.0# http://semver.org/
 INSTALL=${HOME}
 PERL_LIB=${INSTALL}/lib
 PYTHON_LIB=${INSTALL}/lib
