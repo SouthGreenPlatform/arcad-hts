@@ -237,8 +237,6 @@ my $deleted_rev = 0;
 my $inserted_forw = 0;
 my $inserted_rev = 0;
 
-my $test = 0;
-#Si on a repéré une désynchronization, on peut lire le fichier dont on a pas repéré un nom dans le name_list, autant de fois qu'il y a de name après lui.
 
 while(!$end_of_file)
 {
@@ -284,6 +282,19 @@ while(!$end_of_file)
 						delete($forward_name_list{$to_print});
 					}
 					
+					for(my $i=scalar(@reverse_read); $i>0;$i--)
+					{
+						$deleted_rev++;
+						my $to_print = shift(@reverse_read);
+						print $single_out_handle $to_print;
+						my @splitted = split("\n",$to_print);
+						my $id = $splitted[0];
+						$id =~s/\/\d.*$//;
+						$id =~s/\s\d.+$//;
+						delete($reverse_name_list{$id});
+					}
+					
+					
 					#We flush the matching reads in their respective file
 					print $reverse_out_handle $read_rev;
 					my $to_print = shift(@forward_read);
@@ -294,6 +305,7 @@ while(!$end_of_file)
 					$to_print =~s/\/\d.*$//;
 					$to_print =~s/\s\d.+$//;
 					delete($forward_name_list{$to_print});
+					
 					
 					#We add the forward read to the arrays
 					$forward_name_list{$id_forw} = $inserted_forw;
@@ -316,6 +328,18 @@ while(!$end_of_file)
 						$to_print =~s/\/\d$//;
 						$to_print =~s/\s\d.+$//;
 						delete($reverse_name_list{$to_print});
+					}
+					
+					for(my $i=scalar(@forward_read); $i>0;$i--)
+					{
+						$deleted_forw++;
+						my $to_print = shift(@forward_read);
+						print $single_out_handle $to_print;
+						my @splitted = split("\n",$to_print);
+						my $id = $splitted[0];
+						$id =~s/\/\d.*$//;
+						$id =~s/\s\d.+$//;
+						delete($forward_name_list{$id});
 					}
 					
 					#We flush the matching reads in their respective file
@@ -519,7 +543,6 @@ print (scalar(@forward_read)."\n");
 print (scalar(@reverse_read)."\n");
 print(system("ps aux | grep $$"));
 
-print ($test);
 
 
 ############################
