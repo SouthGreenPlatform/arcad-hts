@@ -72,6 +72,9 @@ use lib '/NAS/arcad_data/Softs/tags';
 use Modules::Files::Files;
 use Modules::Config::Softwares;
 
+#print the line when they are in buffer
+$|=1;
+
 sub help
 { 
 	my $msg = shift;
@@ -146,7 +149,7 @@ GetOptions(
 	"maxMismatch=i"   => \$maxMismatch,
 	"maxIndels=i"     => \$maxIndels,
 	"maxIndelsSize=i" => \$maxIndelsSize,
-	"multipleMap"     => \$multipleMap,
+	"multipleMap!"     => \$multipleMap,
 	"output|o=s"      => \$out,
 	
 	"pattern=s"       => \$pattern,
@@ -222,20 +225,20 @@ foreach my $bam (@$ra_files)
 			next;
 		}
 		
-		## Map at multiple place or two pairs don't mach in the same reference seq
-		if(undef $multipleMap || !$multipleMap)
+		## Map at multiple place or two pairs don't match in the same reference seq
+		if(!defined($multipleMap) || !$multipleMap)
 		{
 			if($line !~ /X0\:i\:1/)
 			{
 				if(!exists($RM_READS{$name})){
-					$RM_READS{$name} = 1;
+					$RM_READS{$name} = "Multimap";
 				}
 				next;
 			}
 			if($NREF ne "=" && $NREF ne "*")
 			{
 				if(!exists($RM_READS{$name})){
-					$RM_READS{$name} = 1;
+					$RM_READS{$name} = "Mate on other sequence";
 				}
 				next;
 			}
@@ -256,7 +259,7 @@ foreach my $bam (@$ra_files)
 		if($mis[2] > $maxMismatch)
 		{
 			if(!exists($RM_READS{$name})){
-				$RM_READS{$name} = 1;
+				$RM_READS{$name} = $mis[2]." mismatches";
 			}
 			next;
 		}
@@ -266,7 +269,7 @@ foreach my $bam (@$ra_files)
 		if($cigar =~ /H/ || $cigar =~ /N/ || $cigar =~ /S/)
 		{
 			if(!exists($RM_READS{$name})){
-				$RM_READS{$name} = 1;
+				$RM_READS{$name} = "H,N or S in cigar";
 			}
 			next;
 		}
@@ -311,7 +314,7 @@ foreach my $bam (@$ra_files)
 		if($numberInDels > $maxIndels || $sizeInDels > $maxIndelsSize)
 		{
 			if(!exists($RM_READS{$name})){
-				$RM_READS{$name} = 1;
+				$RM_READS{$name} = "Too much indels";
 			}
 		}
 	}
@@ -343,7 +346,7 @@ foreach my $bam (@$ra_files)
 	# SAM TO BAM
 	#-----------------------------------------------------
 	my $outb = $bam;
-	$outb =~ s/\.bam$/\.bam.clean/;	
+	$outb =~ s/\.bam$/\.clean.bam/;	
 	#my $rh_qsub = &$Softwares::RH_QSUB;
 	#my $qsub = &Softwares::make_qsub_command($rh_qsub);
 	#$$rh_qsub{N} = 'samtools_view';	
@@ -353,7 +356,7 @@ foreach my $bam (@$ra_files)
 
 	open O, '>', $sam . '_reads_removed.txt' or confess "$!\n";
 	foreach my $n (keys %RM_READS){
-		print O "$n\n";
+		print O "$n\t".$RM_READS{$n}."\n";
 	}
 	close O;
 
