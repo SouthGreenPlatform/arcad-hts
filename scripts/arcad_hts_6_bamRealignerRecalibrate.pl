@@ -1,7 +1,7 @@
 #!/bin/env perl
 
 #  
-#  Copyright 2014 INRA-CIRAD
+#  Copyright 2014-2015 INRA-CIRAD
 #  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ Reference used for mapping.
 A database of known polymorphic sites to skip over in the recalibration algorithm.
 Use for BaseRecalibrator
 
-=item B<-o|--out> (output file)
+=item B<-o|--out> (output directory)
 
 An existing directory in which to put all the results
 
@@ -402,11 +402,11 @@ sub qsub_command
 
 =head1 VERSION
 
-1.0.0
+1.0.1
 
 =head1 DATE
 
-25.06.2014
+28.05.2015
 
 =head1 LICENSE AND COPYRIGHT
 
