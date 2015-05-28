@@ -111,7 +111,7 @@ my ($man, $help, $debug, $input, $output, $gz, $subdirectory,$extract, $queue);
 $gz=1;
 $subdirectory=1;
 $extract=1;
-$queue="bioinfo.q";
+$queue="normal.q";
 
 # parse options and print usage if there is a syntax error.
 #--- see doc at http://perldoc.perl.org/Getopt/Long.html
@@ -132,11 +132,11 @@ if ($man) {pod2usage(-verbose => 2);}
 my $list_command;
 if($subdirectory)
 {
-  $list_command="find $input -type f -name \"*.fastq\" ";
+  $list_command="find -L $input -type f -name \"*.fastq\" ";
   #if gz is on, we also looked for fastq.gz file
   if($gz)
   {
-    $list_command=$list_command."; find $input -type f -name \"*.fastq.gz\"";
+    $list_command=$list_command."; find -L $input -type f -name \"*.fastq.gz\"";
   }
 }
 else
