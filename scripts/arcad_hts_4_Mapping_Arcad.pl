@@ -62,6 +62,14 @@ First column must contain a path to a fastq file
 Second column must contain the RG ID associated to the fastq file
 Third column must contain "single" or "paired"
 Fourth column if data are paired must contain the associated fastq file of the first one
+After the third column if you are in single or the fourth in paired,
+you can add additional information that will be written in the @RG field.
+These additionnal information must be formatted like this:
+FieldName=FielValue
+Example: PL=ILLUMINA
+One additionnal RG information by column.
+By default, @RG will contain the ID, the PL with ILUMMINA and SM with the same value as ID
+
 
 =item B<[-o]> ([a BAM File]): 
 
@@ -141,7 +149,21 @@ pod2usage({     -msg     => "Cannot find the config file \nPlease set valid valu
 	  }
     )if( !(-e $conf_file) );
 
-
+my %RG_FIELDS = (
+	'CN' => '',
+	'DS' => '',
+	'DT' => '',
+	'FO' => '',
+	'KS' => '',
+	'LB' => '',
+	'PG' => '',
+	'PI' => '',
+	'PM' => '',
+	'PL' => '',
+	'PU' => '',
+	'SM' => ''
+	);
+	
 my %MAPPERS = (bwa => \&map_bwa, bwa_mem => \&map_bwa_mem );
 my $PICARD_TOOLS_DIRECTORY=&$Softwares::PICARD_TOOLS_DIRECTORY;
 my $JAVA_PATH=&$Softwares::JAVA_PATH;
@@ -174,13 +196,64 @@ if (open(my $conf_handle, $conf_file))
 			print "Cannot find the fastq file ".$splitted[0];
 			exit();
 		}
-		if(scalar(@splitted == 4) && ! -e $splitted[3])
+		if($splitted[2] eq "paired")
 		{
-			print "Cannot find the fastq file ".$splitted[3];
-			exit();
+			if(! -e $splitted[3])
+			{
+				print "Cannot find the fastq file ".$splitted[3];
+				exit();
+			}			
 		}
+		elsif($splitted[2] ne "single")
+		{
+			pod2usage({     -msg     => "conf file third column must be single or paired. Value:".$splitted[2],
+		    -exitval => 0
+			})
+			
+		}
+		
+		my $i;
+		if($splitted[2] eq "paired")
+		{
+			$i=4;
+		}
+		else
+		{
+			$i=3;
+		}
+		my $rg = " \'\@RG\tID:".$splitted[1]."\tPL:ILLUMINA\tSM:".$splitted[1];
+		for(;$i<scalar(@splitted);$i++)
+		{
+			my @field = split('=', $splitted[$i]);
+			my $id = $field[0];
+			my $val = $field[1];
+			if(exists($RG_FIELDS{$id}))
+			{
+				if($id eq 'PL')
+				{
+					$rg =~ s/PL:ILLUMINA/PL:$val/;
+				}
+				elsif($id eq 'SM')
+				{
+					my $smp = $splitted[1];
+					$rg =~ s/SM:$smp/SM:$val/;
+				}
+				else
+				{
+					$rg.="\t".$id.":".$val;
+				}
+			}
+			else
+			{
+				pod2usage({     -msg     => $field[0]." not expected as a RG field in ".$_,
+				-exitval => 0
+				})
+			}
+		}
+		$rg.="\'";
+		print $rg."\n";
 		my $bam_output = "$splitted[1].$splitted[2].bam";
-		my $i=1;
+		$i=1;
 		while(exists($mapping_files{"$tmp_directory/$bam_output"}))
 		{
 			$bam_output= "$splitted[1].$splitted[2]_$i.bam";
@@ -188,13 +261,13 @@ if (open(my $conf_handle, $conf_file))
 		}
 		$mapping_files{"$tmp_directory/$bam_output"}++;
 		
-		if(scalar(@splitted==3))
+		if($splitted[2] eq "single")
 		{
-			$MAPPERS{$mapper}->($splitted[0], $reference, $bam_output, $splitted[1], $rmdup,$tmp_directory);
+			$MAPPERS{$mapper}->($splitted[0], $reference, $bam_output, $rg, $rmdup,$tmp_directory);
 		}
-		elsif(scalar(@splitted==4))
+		elsif($splitted[2] eq "paired")
 		{
-			$MAPPERS{$mapper}->($splitted[0], $reference, $bam_output, $splitted[1], $rmdup, $tmp_directory, $splitted[3]);
+			$MAPPERS{$mapper}->($splitted[0], $reference, $bam_output, $rg, $rmdup, $tmp_directory, $splitted[3]);
 		}
 	}
 	close($conf_handle);
@@ -254,7 +327,7 @@ sub map_bwa
 			print $com_handle $BWA_ALN." $reference ".$reverse." > $directory/$pattern.reverse.sai\n\n";
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[BWA] Indexing $reverse OK\n\"" if( $debug );
-			print $com_handle $BWA_SAMPE." -r \'\@RG\tID:".$rg."\tPL:ILLUMINA\tSM:".$rg."\' $reference $directory/$pattern.forward.sai $directory/$pattern.reverse.sai $forward $reverse > $directory/$pattern.sam\n\n";
+			print $com_handle $BWA_SAMPE." -r $rg $reference $directory/$pattern.forward.sai $directory/$pattern.reverse.sai $forward $reverse > $directory/$pattern.sam\n\n";
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[BWA] Paired end mapping OK\n\n\"" if( $debug );
 			print $com_handle $SAMTOOLS_PATH." view -Sb -o $directory/$pattern.bam  $directory/$pattern.sam\n\n";
@@ -267,7 +340,7 @@ sub map_bwa
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[PICARD] Sort $directory/$pattern.bam by coordinate OK\n\n\"" if( $debug );
 		}else{
-			print $com_handle $BWA_SAMSE." -r \'\@RG\tID:".$rg."\tPL:ILLUMINA\tSM:".$rg."\' $reference $directory/$pattern.forward.sai ".$forward." > $directory/$pattern.sam\n\n";
+			print $com_handle $BWA_SAMSE." -r $rg $reference $directory/$pattern.forward.sai ".$forward." > $directory/$pattern.sam\n\n";
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[BWA] Single end mapping OK\n\n\"" if( $debug );
 			print $com_handle $JAVA_PATH." -Xmx4g -jar $PICARD_TOOLS_DIRECTORY/picard.jar SortSam I=$directory/$pattern.sam O=$directory/$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT\n\n";
@@ -311,7 +384,7 @@ sub map_bwa_mem
 		print $com_handle "$HEADER\n";
 		if( defined $reverse && -e $reverse )
 		{
-			print $com_handle $BWA_MEM . " -M -R '\@RG\tID:$rg\tPL:ILLUMINA\tSM:$rg' $reference $forward $reverse > $directory/$pattern.sam\n\n";
+			print $com_handle $BWA_MEM . " -M -R $rg $reference $forward $reverse > $directory/$pattern.sam\n\n";
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[BWA] Paired end mapping OK\n\n\"" if( $debug );
 			print $com_handle $SAMTOOLS_PATH." view -Sb -o $directory/$pattern.bam $directory/$pattern.sam\n\n";
@@ -324,7 +397,7 @@ sub map_bwa_mem
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[PICARD] Sort $directory/$pattern.bam by coordinate OK\n\n\"" if( $debug );
 		}else{
-			print $com_handle $BWA_MEM . " -M -R '\@RG\tID:$rg\tPL:ILLUMINA\tSM:$rg' $reference $forward > $directory/$pattern.sam\n\n";
+			print $com_handle $BWA_MEM . " -M -R $rg $reference $forward > $directory/$pattern.sam\n\n";
 			print $com_handle "$TEST_BASH\n\n";
 			#print $com_handle "echo \"[BWA] Single end mapping OK\n\n\"" if( $debug );
 			print $com_handle $JAVA_PATH." -Xmx4g -jar $PICARD_TOOLS_DIRECTORY/picard.jar SortSam I=$directory/$pattern.sam O=$directory/$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT\n\n";
