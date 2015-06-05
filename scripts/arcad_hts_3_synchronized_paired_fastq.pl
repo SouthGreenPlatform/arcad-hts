@@ -244,18 +244,16 @@ while(!$end_of_file)
 	{ 
 		my $read_forw .= $id_forw;
 		chomp($id_forw);
-		$id_forw=~s/\/\d$//;
 		$id_forw=~s/\s\d.+$//;
-		$id_forw=~s/\/\d\s\d.+$//;
+		$id_forw=~s/\/\d$//;
 		$read_forw .= <$forward_handle>.<$forward_handle>.<$forward_handle>;
 		
 		if(my $id_rev = <$reverse_handle>)
 		{
 			my $read_rev .= $id_rev;
 			chomp($id_rev);
-			$id_rev=~s/\/\d$//;
 			$id_rev=~s/\s\d.+$//;
-			$id_rev=~s/\/\d\s\d.+$//;
+			$id_rev=~s/\/\d$//;
 			$read_rev .= <$reverse_handle>.<$reverse_handle>.<$reverse_handle>;
 			
 			if($id_rev eq $id_forw)
@@ -279,9 +277,8 @@ while(!$end_of_file)
 						print $single_out_handle $to_print;
 						my @splitted = split("\n",$to_print);
 						$to_print = $splitted[0];
-						$to_print =~s/\/\d.*$//;
 						$to_print =~s/\s\d.+$//;
-						$to_print =~s/\/\d\s\d.+$//;
+						$to_print =~s/\/\d$//;
 						delete($forward_name_list{$to_print});
 					}
 					
@@ -292,9 +289,8 @@ while(!$end_of_file)
 						print $single_out_handle $to_print;
 						my @splitted = split("\n",$to_print);
 						my $id = $splitted[0];
-						$id =~s/\/\d.*$//;
 						$id =~s/\s\d.+$//;
-						$id =~s/\/\d\s\d.+$//;
+						$id =~s/\/\d$//;
 						delete($reverse_name_list{$id});
 					}
 					
@@ -306,9 +302,8 @@ while(!$end_of_file)
 					print $forward_out_handle $to_print;
 					my @splitted = split("\n",$to_print);
 					$to_print = $splitted[0];
-					$to_print =~s/\/\d.*$//;
 					$to_print =~s/\s\d.+$//;
-					$to_print =~s/\/\d\s\d.+$//;
+					$to_print =~s/\/\d$//;
 					delete($forward_name_list{$to_print});
 					
 					
@@ -330,9 +325,8 @@ while(!$end_of_file)
 						print $single_out_handle $to_print;
 						my @splitted = split("\n",$to_print);
 						$to_print = $splitted[0];
-						$to_print =~s/\/\d$//;
 						$to_print =~s/\s\d.+$//;
-						$to_print =~s/\/\d\s\d.+$//;
+						$to_print =~s/\/\d$//;
 						delete($reverse_name_list{$to_print});
 					}
 					
@@ -343,9 +337,8 @@ while(!$end_of_file)
 						print $single_out_handle $to_print;
 						my @splitted = split("\n",$to_print);
 						my $id = $splitted[0];
-						$id =~s/\/\d.*$//;
 						$id =~s/\s\d.+$//;
-						$id =~s/\/\d\s\d.+$//;
+						$id =~s/\/\d$//;
 						delete($forward_name_list{$id});
 					}
 					
@@ -356,9 +349,8 @@ while(!$end_of_file)
 					print $reverse_out_handle $to_print;
 					my @splitted = split("\n",$to_print);
 					$to_print = $splitted[0];
-					$to_print =~s/\/\d$//;
 					$to_print =~s/\s\d.+$//;
-					$to_print =~s/\/\d\s\d.+$//;
+					$to_print =~s/\/\d$//;
 					delete($reverse_name_list{$to_print});
 					
 					#We add the reverse read to the arrays
@@ -379,9 +371,8 @@ while(!$end_of_file)
 						print $single_out_handle $to_print;
 						my @splitted = split("\n",$to_print);
 						$to_print = $splitted[0];
-						$to_print =~s/\/\d.*$//;
 						$to_print =~s/\s\d.+$//;
-						$to_print =~s/\/\d\s\d.+$//;
+						$to_print =~s/\/\d$//;
 						delete($forward_name_list{$to_print});
 					}
 					
@@ -392,9 +383,8 @@ while(!$end_of_file)
 					print $forward_out_handle $to_print;
 					my @splitted = split("\n",$to_print);
 					$to_print = $splitted[0];
-					$to_print =~s/\/\d.*$//;
 					$to_print =~s/\s\d.+$//;
-					$to_print =~s/\/\d\s\d.+$//;
+					$to_print =~s/\/\d.*$//;
 					delete($forward_name_list{$to_print});
 					
 					#We add the forward read to the arrays
@@ -433,9 +423,8 @@ while(!$end_of_file)
 					print $single_out_handle $to_print;
 					my @splitted = split("\n",$to_print);
 					$to_print = $splitted[0];
-					$to_print =~s/\/\d$//;
 					$to_print =~s/\s\d.+$//;
-					$to_print =~s/\/\d\s\d.+$//;
+					$to_print =~s/\/\d$//;
 					delete($reverse_name_list{$to_print});
 				}
 				
@@ -446,9 +435,9 @@ while(!$end_of_file)
 				print $reverse_out_handle $to_print;
 				my @splitted = split("\n",$to_print);
 				$to_print = $splitted[0];
-				$to_print =~s/\/\d$//;
 				$to_print =~s/\s\d.+$//;
-				$to_print =~s/\/\d\s\d.+$//;
+				$to_print =~s/\/\d$//;
+				
 				delete($reverse_name_list{$to_print});
 			
 			}
@@ -471,9 +460,9 @@ if($end_of_file == 1)
 	{
 		my $read_rev .= $id_rev;
 		chomp($id_rev);
-		$id_rev=~s/\/\d$//;
 		$id_rev=~s/\s\d.+$//;
-		$id_rev =~s/\/\d\s\d.+$//;
+		$id_rev=~s/\/\d$//;
+		
 		$read_rev .= <$reverse_handle>.<$reverse_handle>.<$reverse_handle>;
 
 		if(exists $forward_name_list{$id_rev})
@@ -506,9 +495,9 @@ else
 	{
 		my $read_forw .= $id_forw;
 		chomp($id_forw);
-		$id_forw=~s/\/\d$//;
 		$id_forw=~s/\s\d.+$//;
-	    $id_forw =~s/\/\d\s\d.+$//;
+		$id_forw=~s/\/\d$//;
+		
 		$read_forw .= <$forward_handle>.<$forward_handle>.<$forward_handle>;
 		
 		if(exists $reverse_name_list{$id_forw})
@@ -596,9 +585,8 @@ sub modifname { # Remove the 1 or 2 (or any text separated by a space from the n
     my @out;
     foreach my $name (@list)
         {
+		$name =~ s/\s\d:.+$//;# Remove 1:..:...: or anything after a space, for Illumina1.8+
         $name=~ s/\/\d$//; # Remove /1 or /2 for Illumina1.3 or 1.5
-        $name =~ s/\s\d:.+$//;# Remove 1:..:...: or anything after a space, for Illumina1.8+
-        $name =~ s/\/\d\s\d.+$//; #Remove both /1 and 1:..:..:.. as it may happen
         push @out, $name;
         }
     return @out;
