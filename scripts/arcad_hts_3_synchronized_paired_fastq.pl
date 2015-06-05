@@ -246,6 +246,7 @@ while(!$end_of_file)
 		chomp($id_forw);
 		$id_forw=~s/\/\d$//;
 		$id_forw=~s/\s\d.+$//;
+		$id_forw=~s/\/\d\s\d.+$//;
 		$read_forw .= <$forward_handle>.<$forward_handle>.<$forward_handle>;
 		
 		if(my $id_rev = <$reverse_handle>)
@@ -254,6 +255,7 @@ while(!$end_of_file)
 			chomp($id_rev);
 			$id_rev=~s/\/\d$//;
 			$id_rev=~s/\s\d.+$//;
+			$id_rev=~s/\/\d\s\d.+$//;
 			$read_rev .= <$reverse_handle>.<$reverse_handle>.<$reverse_handle>;
 			
 			if($id_rev eq $id_forw)
