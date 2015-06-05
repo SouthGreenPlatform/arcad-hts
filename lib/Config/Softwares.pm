@@ -49,7 +49,7 @@ use warnings;
 
 C<$PICARD_TOOLS_DIRECTORY> Path where to find all Picard tools (*.jar), Version 1.7
 
-C<$GATK_DIRECTORY> Path where to find all GATK jar files, Version 1.6
+C<$GATK_DIRECTORY> Path where to find all GATK jar files, Version 3.3
 
 C<$JAVA_PATH> Lastest version of java command, Version 1.6
 
@@ -58,6 +58,11 @@ C<$SAMTOOLS_PATH> Lastest version of samtools, Version 0.1.18
 C<$BWA_PATH> Lastest version of bwa, Version 0.5.9
 
 =cut
+
+our $INTERSECTBED_PATH = sub {
+	return 'module load compiler/gcc/4.9.2;/usr/local/bioinfo/bedtools/2.17.0/bin/intersectBed' if( -e '/usr/local/bioinfo/bedtools/2.17.0/bin/intersectBed' );
+	return;
+};
 
 our $PICARD_TOOLS_DIRECTORY = sub {
 	return '/usr/local/bioinfo/picard-tools/1.130/' if( -d '/usr/local/bioinfo/picard-tools/1.130/' );

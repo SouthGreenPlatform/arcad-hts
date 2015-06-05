@@ -45,6 +45,7 @@ use Bio::SeqIO;
 
 use lib '/NAS/arcad_data/Softs/tags';
 use Modules::Config::Softwares;
+use Modules::Files::Bam;
 
 =pod
 
@@ -114,7 +115,7 @@ unless (@ARGV)
     );
 
 my $SAMTOOLS_PATH=&$Softwares::SAMTOOLS_PATH or confess("$!");
-my $INTERSECTBED_PATH="/usr/local/bioinfo/bedtools/bin/intersectBed";
+my $INTERSECTBED_PATH=&$Softwares::INTERSECTBED_PATH or confess("$!");
 
 #options processing
 my ($man, $help, $debug, $vcf, $bam, $output, $ref, @prefix, $depth, $intervals);
@@ -151,6 +152,11 @@ if(! -e $output)
 {
   mkdir $output;
 }
+
+# INDEXING input bam file
+my @t = ($bam);
+my $o_bam = Bam->new( \@t );
+$o_bam->indexBam;
 
 my $vcf_handle;
 my $output_handle;
@@ -252,7 +258,7 @@ if (open($intervals_handle, "$intervals"))
 
      my $fasta_file = @splitted == 3 ? $numerical_id++ : $splitted[3];
 
-   system("$SAMTOOLS_PATH faidx $ref $interval >$tmp/fasta/$fasta_file.fasta && sed -i 's/>.*/>'$fasta_file'/' $tmp/fasta/$fasta_file.fasta");
+	system("$SAMTOOLS_PATH faidx $ref '$interval' >$tmp/fasta/$fasta_file.fasta && sed -i 's/>.*/>'$fasta_file'/' $tmp/fasta/$fasta_file.fasta");
   }
 }
 else
@@ -326,11 +332,11 @@ foreach my $group (@prefix)
    #Create BAM
 	 if($debug >0)
 	 {
-		print "Launched:\n"."$SAMTOOLS_PATH view -r $group -h -b  $bam $interval>$tmp/tmp.bam && $SAMTOOLS_PATH index $tmp/tmp.bam\n";
+		print "Launched:\n"."$SAMTOOLS_PATH view -r $group -h -b  $bam '$interval'>$tmp/tmp.bam && $SAMTOOLS_PATH index $tmp/tmp.bam\n";
 	 }
-     system("$SAMTOOLS_PATH view -r $group -h -b  $bam $interval>$tmp/tmp.bam && $SAMTOOLS_PATH index $tmp/tmp.bam");
+     system("$SAMTOOLS_PATH view -r $group -h -b  $bam '$interval'>$tmp/tmp.bam && $SAMTOOLS_PATH index $tmp/tmp.bam");
    #Create depth
-     system("$SAMTOOLS_PATH depth -r $interval $tmp/tmp.bam >$tmp/tmp.dp");
+     system("$SAMTOOLS_PATH depth -r '$interval' $tmp/tmp.bam >$tmp/tmp.dp");
    #Replace by N where depth is below threshold
      my $depth_handle;
    #If the depth file is empty, then we replace all the sequence by N's
