@@ -114,14 +114,13 @@ if ($version) {print "1.0.0\n";exit}
 
 if(! -e $input){ print "the file $input does not exist\n";}
 
+$ped = $output.".ped";
+$indiv = $output."_Indiv_a_garder.txt";
+
 open (F, $input) or die "cannot open the file $input\n";
 open(OUT, ">$output") or die"cannot open the file $output\n";
 open(PED, ">$ped") or die "cannot open the file $ped\n";
 open(INDIV, ">$indiv") or die "cannot open the file $indiv\n";
-
-
-$ped = $output.".ped";
-$indiv = $output."_Indiv_a_garder.txt";
 
 
 while(my $line =<F>){
