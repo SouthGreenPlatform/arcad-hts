@@ -215,7 +215,7 @@ pod2usage(0) if(!@input || !$output);
 
 if (!@databases){
 
-	push (@databases, ['/SATA/bank/biomaj/uniprot/current/blast/uniprot_sprot.fasta', 'p'], ['/SATA/bank/biomaj/uniprot/current/blast/uniprot_trembl.fasta', 'p'], ['/SATA/bank/biomaj/nr/current/flat/nr', 'p'], ['/SATA/bank/biomaj/nt/current/flat/nt', 'n']);
+	push (@databases, ['/bank/biomaj/swissprot/current/blast/swissprot', 'p'], ['/bank/uniprot/uniprot_trembl_XA.fasta', 'p'], ['/bank/biomaj/nr/current/flat/nr', 'p'], ['/bank/biomaj/nt/current/flat/nt', 'n']);
 
 }
 
