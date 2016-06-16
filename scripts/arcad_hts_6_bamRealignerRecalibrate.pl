@@ -204,7 +204,7 @@ my $o_unified = sub
 #-----------------------------------------------------
 # EXECUTABLES path
 #-----------------------------------------------------
-my $java_opts = ' -Xmx4g'; # Pour les très gros fichiers, option inutile pour l'instant
+my $java_opts = ' -Xmx8g'; # Pour les très gros fichiers, option inutile pour l'instant
 my $JAVA_PATH = &$Softwares::JAVA_PATH or confess("$!");
 my $GATK_DIR  = &$Softwares::GATK_DIRECTORY or confess("$!");
 my $GATK_COMMAND = "$JAVA_PATH $java_opts -jar $GATK_DIR/GenomeAnalysisTK.jar";
