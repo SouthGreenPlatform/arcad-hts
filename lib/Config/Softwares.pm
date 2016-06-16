@@ -79,7 +79,7 @@ our $JAVA_PATH              = sub {
 };
 
 our $SAMTOOLS_PATH          = sub {
-	return '/usr/local/bioinfo/samtools/1.2/bin/samtools' if( -e '/usr/local/bioinfo/samtools/1.2/bin/samtools' );
+	return '/usr/local/bioinfo/samtools/1.3/bin/samtools' if( -e '/usr/local/bioinfo/samtools/1.3/bin/samtools' );
 	return;
 };
 
