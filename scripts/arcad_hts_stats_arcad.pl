@@ -218,7 +218,7 @@ sub extract_individual_FPKM
   
   my $base_dir = cwd;
   #Extraction des nom des readgroup
-  system("$SAMTOOLS_PATH view -H $global_bam |awk '/\@RG/{sub(\"ID:\",\"\",\$2);print \$2}' >$tmp/RG");
+  system("$SAMTOOLS_PATH view -H $global_bam |grep -v bwa |awk '/\@RG/{sub(\"ID:\",\"\",\$2);print \$2}' >$tmp/RG");
   #Creation d'un fichier BAM par readgroup
   my $bam_dir = "$tmp/bam";
   mkdir("$bam_dir");
