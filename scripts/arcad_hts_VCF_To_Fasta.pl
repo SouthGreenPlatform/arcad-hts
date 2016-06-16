@@ -337,6 +337,27 @@ foreach my $group (@prefix)
      system("$SAMTOOLS_PATH view -r $group -h -b  $bam '$interval'>$tmp/tmp.bam && $SAMTOOLS_PATH index $tmp/tmp.bam");
    #Create depth
      system("$SAMTOOLS_PATH depth -r '$interval' $tmp/tmp.bam >$tmp/tmp.dp");
+   #If depth is empty, we look for the ID in the SM fields of RG
+     if(-z "$tmp/tmp.dp")
+     {
+       system("$SAMTOOLS_PATH view -H  $bam | sed -n '/^".'@RG'."/ p' >$tmp/RG.tmp");
+       my $rg_handle;
+       my $rg_out;
+       my @rg_to_keep;
+       if(open($rg_handle, "$tmp/RG.tmp") && open($rg_out, ">$tmp/rg_list"))
+	   {
+		 while(<$rg_handle>)
+		 {
+	       chomp();
+	       if($_ =~ /ID:([^\s]+).*SM:$group/)
+	       {
+		       print $rg_out $1."\n";
+	       }
+	     }
+	   }
+     }
+	 system("$SAMTOOLS_PATH view -R $tmp/rg_list -h -b  $bam '$interval'>$tmp/tmp.bam && $SAMTOOLS_PATH index $tmp/tmp.bam");
+	 system("$SAMTOOLS_PATH depth -r '$interval' $tmp/tmp.bam >$tmp/tmp.dp");
    #Replace by N where depth is below threshold
      my $depth_handle;
    #If the depth file is empty, then we replace all the sequence by N's
@@ -393,6 +414,10 @@ foreach my $group (@prefix)
           $old = $pos;
         }
         close($depth_handle);
+        for(my $i=$pos+1; $i<(length($nucleotide));$i++)
+          {
+            substr($nucleotide,$i,1) = "N";
+          }
       }
       else
       {
