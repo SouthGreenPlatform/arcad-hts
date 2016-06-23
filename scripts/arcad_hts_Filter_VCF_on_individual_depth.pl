@@ -69,6 +69,10 @@ A prefix to allowing to groups sample
 
 The minimum depth for a sample, to consider it at a position
 
+=item B<[-ind_min_gq]> ([an integer ])
+
+The minimum genotype quality for a sample, to consider it at a position
+
 =item B<[-ind_min_number]> ([an integer])
 
 The minimum number of individuals that are considered at the position to keep it in the output VCF
@@ -90,7 +94,7 @@ unless (@ARGV)
 }
 
 #options processing
-my ($man, $help, $debug, $input, $output, @prefix, @depth, @number, $mask_depth);
+my ($man, $help, $debug, $input, $output, @prefix, @depth, @gq, @number, $mask_depth);
 $mask_depth=0;
 # parse options and print usage if there is a syntax error.
 #--- see doc at http://perldoc.perl.org/Getopt/Long.html
@@ -99,6 +103,7 @@ GetOptions("help|?"     => \$help,
            "debug:i"    => \$debug,
            "ind_prefix|p=s" =>\@prefix,
            "ind_min_depth|d=i" =>\@depth,
+           "ind_min_gq|d=i" =>\@gq,
            "ind_min_number|n=i" =>\@number,
            "mask|m=i"       =>\$mask_depth,
            "input|conf|i=s" => \$input, 
@@ -123,6 +128,19 @@ if(@prefix != @number)
 {
   pod2usage(0);
   exit("You did not precise the same number of sample groups than sample number");
+}
+
+if(@prefix != @gq && scalar(@gq) != 0) 
+{
+  pod2usage(0);
+  exit("You did not precise the same number of sample groups than sample genotype quality");
+}
+elsif(scalar(@gq) == 0)
+{
+	for(my $i=0; $i<scalar(@prefix);$i++)
+	{
+		push(@gq, 0);
+	}
 }
 
 my $input_handle;
@@ -171,11 +189,11 @@ if (open($input_handle, $input))
               if($splitted[$id] ne "./.")
               {
                 my @split_id = split(':', $splitted[$id]);
-                if($split_id[2] >= $depth[$i])
+                if($split_id[2] >= $depth[$i] && $split_id[3] >= $gq[$i])
                 {
                   $num++;
                 }
-                if($split_id[2]<$mask_depth)
+                if($split_id[2]<$mask_depth || $split_id[3] < $gq[$i])
                 {
                   $splitted[$id] = "./.";
                 }
